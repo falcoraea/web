@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Falcora: robot trading XAUUSD untuk MetaTrader 5</title>
+<meta name="description" content="Falcora Moving dan Falcora Eleven, Expert Advisor XAUUSD untuk MetaTrader 5 dengan panel proteksi: daily target, equity quit, money management, dan daily loss.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+/* =====================================================================
+   PENGATURAN - ubah harga, link Mayar, dan kontak di sini saja
+   ---------------------------------------------------------------------
+   link    : link checkout Mayar TANPA bot Telegram
+   linkTg  : link checkout Mayar DENGAN bot Telegram (produk/harga terpisah di Mayar)
+   price   : harga resmi (angka rupiah), 0 = Gratis
+   strike  : harga coret (0 = tidak ditampilkan)
+   ===================================================================== */
+var CONFIG = {
+  waAdmin:  '628xxxxxxxxxx',          // nomor WhatsApp admin (format 62...)
+  formUrl:  'https://script.google.com/macros/s/GANTI_ID_DEPLOYMENT/exec',   // halaman pendaftaran
+  telegram: { price: 99000, strike: 149000, label: 'per masa lisensi' },
+  products: {
+    trial: {
+      name: 'Trial', code: 'TRIAL', period: 'Akses 7 hari, 1 akun',
+      price: 0, strike: 0, allowTg: false,
+      link: 'https://mayar.id/GANTI-LINK-TRIAL', linkTg: ''
+    },
+    moving: {
+      name: 'Falcora Moving', code: 'MOVING', period: 'Lisensi 30 hari, 1 akun',
+      price: 1490000, strike: 2490000, allowTg: true,
+      link: 'https://mayar.id/GANTI-LINK-MOVING', linkTg: 'https://mayar.id/GANTI-LINK-MOVING-TELEGRAM'
+    },
+    eleven: {
+      name: 'Falcora Eleven', code: 'ELEVEN', period: 'Lisensi 30 hari, 1 akun',
+      price: 1290000, strike: 1990000, allowTg: true,
+      link: 'https://mayar.id/GANTI-LINK-ELEVEN', linkTg: 'https://mayar.id/GANTI-LINK-ELEVEN-TELEGRAM'
+    }
+  }
+};
+</script>
+<style>
+  :root{
+    --night:#070d1a; --ink:#0d172d; --ink2:#111e3a; --line:#22345a; --line2:#2f4677;
+    --gold:#f0b030; --gold2:#ffd27a; --text:#e7ecf5; --mist:#8d9cbb; --profit:#26d08c; --loss:#f05a66;
+    --r-lg:20px; --r-md:12px; --r-sm:8px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--night);color:var(--text);font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  :focus-visible{outline:2px solid var(--gold2);outline-offset:3px;border-radius:6px}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* ---------- nav ---------- */
+  nav{position:sticky;top:0;z-index:20;background:rgba(7,13,26,.86);backdrop-filter:blur(10px);border-bottom:1px solid rgba(34,52,90,.6)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;letter-spacing:.16em;color:var(--gold);font-size:18px}
+  .logo i{width:30px;height:30px;border-radius:8px;background:linear-gradient(140deg,var(--gold2),#c4800f);display:grid;place-items:center}
+  .navlinks{display:flex;gap:26px;font-size:14px;color:var(--mist)}
+  .navlinks a{text-decoration:none}
+  .navlinks a:hover{color:var(--text)}
+  .navbtn{background:var(--gold);color:#1a1103;font-weight:700;font-size:14px;padding:9px 16px;border-radius:999px;text-decoration:none}
+
+  /* ---------- hero ---------- */
+  .hero{padding:72px 0 64px;position:relative;overflow:hidden}
+  .hero:before{content:"";position:absolute;inset:-200px -200px auto auto;width:720px;height:720px;background:radial-gradient(closest-side,rgba(240,176,48,.16),transparent);pointer-events:none}
+  .hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+  h1{font-size:clamp(34px,5vw,56px);line-height:1.08;letter-spacing:-.02em;font-weight:800;margin:0 0 20px;max-width:13ch}
+  .lead{font-size:18px;color:#b9c4da;max-width:46ch;margin:0 0 30px}
+  .hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;font:700 15px "Plus Jakarta Sans";padding:14px 22px;border-radius:999px;text-decoration:none}
+  .btn-gold{background:linear-gradient(140deg,var(--gold2),var(--gold));color:#1a1103}
+  .btn-gold:hover{filter:brightness(1.05)}
+  .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--line2)}
+  .facts{display:flex;gap:28px;margin-top:36px;color:var(--mist);font-size:14px;flex-wrap:wrap}
+  .facts b{display:block;color:var(--text);font-size:15px}
+
+  /* panel replica (the memorable thing) */
+  .mt5{justify-self:center;width:100%;max-width:340px;background:#09101f;border:1px solid var(--line);border-radius:6px;box-shadow:0 40px 80px -30px rgba(0,0,0,.8),0 0 0 8px rgba(240,176,48,.04);font-size:13px;position:relative}
+  .mt5 .hd{background:#101c34;padding:14px 18px 12px;border-bottom:2px solid var(--gold);display:flex;justify-content:space-between;align-items:flex-start}
+  .mt5 .hd b{font-size:20px;letter-spacing:.06em;color:var(--gold)}
+  .mt5 .hd small{display:block;color:var(--mist);font-weight:700;font-size:10px;letter-spacing:.08em}
+  .dot{width:11px;height:11px;border-radius:50%;background:var(--profit);margin-top:6px;box-shadow:0 0 0 0 rgba(38,208,140,.6);animation:pulse 2.4s infinite}
+  @keyframes pulse{70%{box-shadow:0 0 0 9px rgba(38,208,140,0)}100%{box-shadow:0 0 0 0 rgba(38,208,140,0)}}
+  .mt5 .st{margin:12px;border:1px solid var(--line);background:#0e182e;padding:8px 12px;display:flex;justify-content:space-between;align-items:flex-end}
+  .mt5 .st span{color:var(--mist);font-size:10px}
+  .mt5 .st b{display:block;color:var(--profit);font-size:16px;letter-spacing:.02em}
+  .mt5 dl{margin:0;padding:2px 18px 6px}
+  .mt5 dl div{display:flex;justify-content:space-between;padding:4px 0}
+  .mt5 dt{color:var(--mist)}
+  .mt5 dd{margin:0;font-weight:700}
+  .mt5 hr{border:0;border-top:1px solid var(--line);margin:6px 18px}
+  .mt5 .ft{text-align:center;color:#56688f;font-size:10px;padding:8px 0 12px}
+  .pos{color:var(--profit)} .neg{color:var(--loss)}
+
+  /* ---------- sections ---------- */
+  section{padding:84px 0}
+  .sec-head{max-width:640px;margin-bottom:36px}
+  h2{font-size:clamp(26px,3.4vw,38px);line-height:1.15;letter-spacing:-.015em;margin:0 0 12px;font-weight:800}
+  .sub{color:var(--mist);margin:0;font-size:17px}
+
+  /* ---------- picker ---------- */
+  #produk{background:linear-gradient(180deg,var(--night),#0a1427 30%,#0a1427 70%,var(--night))}
+  .picker{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
+  .opts{display:flex;flex-direction:column;gap:14px}
+  .opt{border:1px solid var(--line);background:var(--ink);border-radius:var(--r-lg);transition:border-color .2s,background .2s}
+  .opt.on{border-color:var(--gold);background:var(--ink2)}
+  .opt-top{display:grid;grid-template-columns:28px 1fr auto;gap:16px;align-items:center;padding:20px 22px;cursor:pointer;width:100%;background:none;border:0;color:inherit;text-align:left;font:inherit;border-radius:var(--r-lg)}
+  .radio{width:22px;height:22px;border-radius:50%;border:2px solid var(--line2);display:grid;place-items:center}
+  .opt.on .radio{border-color:var(--gold)}
+  .opt.on .radio:after{content:"";width:10px;height:10px;border-radius:50%;background:var(--gold)}
+  .opt .nm{display:block;margin:0;font-size:19px;font-weight:800;letter-spacing:-.01em}
+  .opt .per{color:var(--mist);font-size:14px}
+  .badge{display:inline-block;margin-left:8px;font-size:12px;font-weight:700;color:#1a1103;background:var(--gold2);padding:2px 9px;border-radius:999px;vertical-align:3px}
+  .price{text-align:right;white-space:nowrap}
+  .price s{display:block;color:#66789e;font-size:14px}
+  .price b{font-size:20px;font-weight:800}
+  .price .off{display:block;color:var(--profit);font-size:12px;font-weight:700}
+  .opt-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease}
+  .opt.on .opt-body{grid-template-rows:1fr}
+  .opt-body>div{overflow:hidden}
+  .opt-inner{padding:0 22px 22px 66px}
+  details.explain{border-top:1px solid var(--line);padding-top:14px}
+  details.explain summary{cursor:pointer;font-weight:700;color:var(--gold2);list-style:none;display:flex;align-items:center;gap:8px}
+  details.explain summary::-webkit-details-marker{display:none}
+  details.explain summary:after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-top:-4px;transition:transform .2s}
+  details.explain[open] summary:after{transform:rotate(-135deg);margin-top:4px}
+  .explain p{color:#c3cde0;margin:12px 0 10px}
+  .explain ul{margin:0;padding-left:18px;color:#c3cde0}
+  .explain li{margin:5px 0}
+  .spec{display:grid;grid-template-columns:repeat(4,auto);justify-content:start;gap:6px 22px;margin:14px 0 0;font-size:13px}
+  .spec dt{color:var(--mist)} .spec dd{margin:0;font-weight:700}
+  .spec div{display:flex;flex-direction:column}
+  .addon{display:flex;gap:14px;align-items:center;margin-top:18px;padding:14px 16px;border-radius:var(--r-md);border:1px dashed var(--line2);background:#0a1328;cursor:pointer}
+  .addon input{position:absolute;opacity:0;width:0;height:0}
+  .sw{flex:none;width:42px;height:24px;border-radius:999px;background:#253658;position:relative;transition:background .2s}
+  .sw:after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#c9d3e6;transition:transform .2s}
+  .addon input:checked+.sw{background:var(--gold)}
+  .addon input:checked+.sw:after{transform:translateX(18px);background:#1a1103}
+  .addon input:focus-visible+.sw{outline:2px solid var(--gold2);outline-offset:3px}
+  .addon b{display:block;font-size:15px}
+  .addon span.t{color:var(--mist);font-size:13px}
+  .addon .ap{margin-left:auto;text-align:right;white-space:nowrap;font-weight:700}
+  .addon .ap s{display:block;color:#66789e;font-weight:400;font-size:12px}
+  .addon.disabled{opacity:.55;cursor:not-allowed}
+
+  /* summary */
+  .summary{position:sticky;top:88px;border:1px solid var(--line);background:var(--ink);border-radius:var(--r-lg);padding:24px}
+  .summary h3{margin:0 0 16px;font-size:17px}
+  .line{display:flex;justify-content:space-between;gap:12px;padding:7px 0;color:#c3cde0;font-size:15px}
+  .line.muted{color:var(--mist);font-size:14px}
+  .total{border-top:1px solid var(--line);margin-top:10px;padding-top:14px;display:flex;justify-content:space-between;align-items:baseline}
+  .total b{font-size:26px;font-weight:800}
+  .save{color:var(--profit);font-size:13px;font-weight:700;text-align:right;min-height:20px}
+  .summary .btn{width:100%;margin-top:16px;font-size:16px;padding:16px}
+  .note{color:var(--mist);font-size:13px;margin:12px 0 0}
+
+  /* mobile checkout bar */
+  .bar{display:none}
+
+  /* ---------- flow ---------- */
+  .flow{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:0;counter-reset:f;border-top:1px solid var(--line)}
+  .flow li{counter-increment:f;padding:26px 24px 0 0;position:relative}
+  .flow li:before{content:counter(f);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--gold);color:#1a1103;font-weight:800;margin:-44px 0 16px}
+  .flow h3{margin:0 0 6px;font-size:17px}
+  .flow p{margin:0;color:var(--mist);font-size:15px}
+
+  /* ---------- protection ---------- */
+  .prot{display:grid;grid-template-columns:repeat(2,1fr);gap:0 56px}
+  .prot div{padding:18px 0;border-bottom:1px solid var(--line)}
+  .prot h3{margin:0 0 4px;font-size:17px;color:var(--gold2)}
+  .prot p{margin:0;color:#b9c4da;font-size:15px}
+  .levels{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
+  .levels div{padding:18px 20px;background:var(--ink)}
+  .levels div+div{border-left:1px solid var(--line)}
+  .levels b{display:block;font-size:16px}
+  .levels span{color:var(--mist);font-size:14px}
+
+  /* ---------- faq ---------- */
+  .faq{max-width:780px}
+  .faq details{border-bottom:1px solid var(--line);padding:18px 0}
+  .faq summary{cursor:pointer;font-weight:700;font-size:17px;list-style:none;display:flex;justify-content:space-between;gap:16px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";color:var(--gold);font-size:22px;line-height:1}
+  .faq details[open] summary:after{content:"\2212"}
+  .faq p{color:#b9c4da;margin:10px 0 0}
+
+  /* ---------- footer ---------- */
+  .risk{border:1px solid rgba(240,90,102,.35);background:rgba(240,90,102,.06);border-radius:var(--r-md);padding:18px 20px;color:#d7c3c6;font-size:14px;max-width:880px}
+  footer{padding:40px 0 120px;color:#56688f;font-size:14px}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+  @media (max-width:960px){
+    .hero .wrap{grid-template-columns:1fr}
+    .mt5{max-width:320px}
+    .picker{grid-template-columns:1fr}
+    .summary{display:none}
+    .bar{display:flex;position:fixed;left:12px;right:12px;bottom:12px;z-index:30;align-items:center;gap:14px;background:#101c34;border:1px solid var(--line2);border-radius:18px;padding:12px 12px 12px 18px;box-shadow:0 20px 40px -10px rgba(0,0,0,.7)}
+    .bar .bt{flex:1;min-width:0}
+    .bar small{display:block;color:var(--mist);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .bar b{font-size:19px}
+    .bar .btn{padding:12px 18px}
+    .flow{grid-template-columns:1fr 1fr;row-gap:40px}
+    .prot{grid-template-columns:1fr}
+    .levels{grid-template-columns:1fr}
+    .levels div+div{border-left:0;border-top:1px solid var(--line)}
+    .navlinks{display:none}
+  }
+  @media (max-width:560px){
+    section{padding:64px 0}
+    .hero{padding:48px 0}
+    .opt-top{grid-template-columns:24px 1fr;padding:18px}
+    .opt-top .price{grid-column:2;text-align:left;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+    .price s{display:inline}
+    .opt-inner{padding:0 18px 18px}
+    .spec{grid-template-columns:repeat(2,auto)}
+    .flow{grid-template-columns:1fr}
+    .addon{flex-wrap:wrap}
+    .addon .ap{margin-left:56px;text-align:left}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="#"><i><svg width="18" height="18" viewBox="0 0 24 24"><path d="M3 15c4-1 7-4 9-9 1 4 4 6 9 6-4 2-7 3-9 7-1-3-4-4-9-4z" fill="#1a1103"/></svg></i>FALCORA</a>
+    <div class="navlinks"><a href="#produk">Produk</a><a href="#cara">Cara beli</a><a href="#proteksi">Proteksi</a><a href="#faq">Tanya jawab</a></div>
+    <a class="navbtn" href="#produk">Pilih EA</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Robot XAUUSD yang tahu kapan harus berhenti.</h1>
+      <p class="lead">Falcora berjalan otomatis di MetaTrader 5 kamu. Target harian, batas rugi, dan money management kamu atur sendiri, dan semuanya terlihat jelas di satu panel.</p>
+      <div class="hero-cta">
+        <a class="btn btn-gold" href="#produk">Lihat harga</a>
+        <a class="btn btn-ghost" href="#produk" data-pick="trial">Coba versi trial</a>
+      </div>
+      <div class="facts">
+        <div><b>XAUUSD</b>Pair utama</div>
+        <div><b>MetaTrader 5</b>Akun tipe hedging</div>
+        <div><b>3 setelan</b>Aman, Agresif, Liar</div>
+      </div>
+    </div>
+
+    <div class="mt5" aria-label="Contoh tampilan panel Falcora di MetaTrader 5">
+      <div class="hd"><div><b>FALCORA</b><small>ELEVEN &nbsp;/&nbsp; AMAN</small></div><span class="dot"></span></div>
+      <div class="st"><div><span>Status</span><b>RUNNING</b></div><span>3 posisi</span></div>
+      <dl class="num">
+        <div><dt>PnL hari ini</dt><dd class="pos" id="demoPnl">+24.60</dd></div>
+        <div><dt>Floating</dt><dd class="neg" id="demoFlt">-3.15</dd></div>
+      </dl>
+      <hr>
+      <dl class="num">
+        <div><dt>Daily Target</dt><dd>$100.00</dd></div>
+        <div><dt>Equity Quit</dt><dd>-$100.00</dd></div>
+        <div><dt>Money Management</dt><dd>-$50 / 60 mnt</dd></div>
+        <div><dt>Daily Loss</dt><dd>-$80.00</dd></div>
+        <div><dt>Equity Awal</dt><dd>$500.00</dd></div>
+      </dl>
+      <hr>
+      <dl class="num">
+        <div><dt>Trading</dt><dd class="pos">AKTIF</dd></div>
+        <div><dt>Lisensi</dt><dd class="pos">VALID</dd></div>
+        <div><dt>Aktif sampai</dt><dd>30 hari lagi</dd></div>
+      </dl>
+      <div class="ft">Contoh tampilan, angka hanya ilustrasi</div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= PRODUK ================= -->
+<section id="produk">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Pilih EA kamu</h2>
+      <p class="sub">Satu lisensi untuk satu akun MT5. Bot notifikasi Telegram bisa ditambahkan di setiap paket berbayar.</p>
+    </div>
+
+    <div class="picker">
+      <div class="opts" id="opts" role="radiogroup" aria-label="Pilihan EA"></div>
+
+      <aside class="summary" aria-live="polite">
+        <h3>Ringkasan pesanan</h3>
+        <div class="line"><span id="sName">Belum ada yang dipilih</span><span class="num" id="sPrice"></span></div>
+        <div class="line muted" id="sTgRow" hidden><span>Bot notifikasi Telegram</span><span class="num" id="sTg"></span></div>
+        <div class="total"><span>Total</span><b class="num" id="sTotal">Rp0</b></div>
+        <div class="save num" id="sSave"></div>
+        <button class="btn btn-gold" id="buy" disabled>Pilih EA dulu</button>
+        <p class="note">Pembayaran di Mayar. Setelah bayar, kamu diarahkan ke formulir pendaftaran akun MT5.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CARA BELI ================= -->
+<section id="cara">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Dari bayar sampai EA jalan</h2>
+      <p class="sub">Biasanya selesai di hari yang sama.</p>
+    </div>
+    <ol class="flow">
+      <li><h3>Bayar di Mayar</h3><p>Pilih EA dan tambahan Telegram bila perlu, lalu selesaikan pembayaran.</p></li>
+      <li><h3>Isi formulir</h3><p>Masukkan ID akun MT5, server broker, WhatsApp, dan ID Telegram.</p></li>
+      <li><h3>Lisensi diaktifkan</h3><p>Admin mengonfirmasi pembayaran dan mengaktifkan akun kamu.</p></li>
+      <li><h3>Pasang di MT5</h3><p>Pasang file EA di chart XAUUSD. Panel akan menampilkan lisensi aktif.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= PROTEKSI ================= -->
+<section id="proteksi">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Kamu yang pegang rem</h2>
+      <p class="sub">Semua batas ini ada di input EA dan bisa diubah kapan saja.</p>
+    </div>
+    <div class="prot">
+      <div><h3>Daily Target</h3><p>Begitu profit hari ini tercapai, semua posisi ditutup dan EA istirahat sampai besok.</p></div>
+      <div><h3>Equity Quit</h3><p>Jika floating minus menyentuh batas yang kamu tentukan, semua posisi ditutup dan EA berhenti sampai besok.</p></div>
+      <div><h3>Money Management</h3><p>Batas floating yang bisa dinyalakan atau dimatikan. Saat tersentuh, posisi ditutup lalu EA trading lagi setelah jeda menit yang kamu atur.</p></div>
+      <div><h3>Daily Loss</h3><p>Batas rugi harian. Jika tersentuh, EA berhenti sampai hari berikutnya.</p></div>
+    </div>
+    <div class="levels">
+      <div><b>Aman</b><span>Posisi searah dibatasi, layer lebih sedikit. Cocok untuk modal kecil.</span></div>
+      <div><b>Agresif</b><span>Lebih banyak peluang entry dengan risiko menengah.</span></div>
+      <div><b>Liar</b><span>Paling aktif, layer lebih banyak. Hanya untuk modal yang siap menanggung risiko besar.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head"><h2>Tanya jawab</h2></div>
+    <div class="faq">
+      <details><summary>Broker apa yang bisa dipakai?</summary><p>Broker apa saja yang menyediakan MetaTrader 5 dengan akun tipe hedging (posisi BUY dan SELL bisa terbuka bersamaan), misalnya Exness. Akun netting tidak bisa dipakai.</p></details>
+      <details><summary>Satu lisensi bisa untuk berapa akun?</summary><p>Satu lisensi untuk satu ID akun MT5. Jika ingin ganti akun, hubungi admin.</p></details>
+      <details><summary>Apakah bisa di-backtest?</summary><p>Tidak. Falcora hanya berjalan di akun demo atau real yang lisensinya aktif. Gunakan paket Trial untuk mencoba langsung di akun demo.</p></details>
+      <details><summary>Komputer harus menyala terus?</summary><p>Ya, MetaTrader 5 harus tetap terbuka dan terhubung internet. Untuk berjalan 24 jam, kami sarankan memakai VPS.</p></details>
+      <details><summary>Apa isi notifikasi Telegram?</summary><p>Notifikasi saat posisi ditutup (profit atau loss), saat EA berhenti karena target atau batas, saat kembali berjalan, dan pengingat sebelum lisensi berakhir.</p></details>
+      <details><summary>Bagaimana cara perpanjang lisensi?</summary><p>Beli paket yang sama lagi di halaman ini, lalu isi formulir dengan ID akun yang sama. Masa aktif diperpanjang oleh admin.</p></details>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="risk"><b>Peringatan risiko.</b> Trading forex dan emas menggunakan leverage dan berisiko tinggi, termasuk kehilangan seluruh modal. Hasil masa lalu tidak menjamin hasil di masa depan. Falcora adalah alat bantu otomatis, bukan jaminan profit. Gunakan dana yang siap kamu tanggung risikonya.</div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>&copy; <span id="yr"></span> Falcora</span>
+    <a id="waFoot" href="#" target="_blank" rel="noopener">Hubungi admin lewat WhatsApp</a>
+  </div>
+</footer>
+
+<div class="bar" id="bar" aria-live="polite">
+  <div class="bt"><small id="bName">Pilih EA di atas</small><b class="num" id="bTotal">Rp0</b></div>
+  <button class="btn btn-gold" id="buy2" disabled>Aku mau</button>
+</div>
+
+<script>
+(function () {
+  var P = CONFIG.products, TG = CONFIG.telegram;
+  var DESC = {
+    trial: {
+      badge: 'Coba dulu',
+      text: 'Rasakan langsung cara kerja Falcora di akun kamu sendiri sebelum berlangganan.',
+      list: ['Akses Falcora Moving dan Falcora Eleven', 'Berlaku untuk 1 akun MT5, disarankan akun demo', 'Semua fitur proteksi dan panel lengkap'],
+      spec: [['Pair', 'XAUUSD'], ['Platform', 'MT5'], ['Akun', 'Hedging'], ['Masa', '7 hari']]
+    },
+    moving: {
+      badge: '',
+      text: 'EA yang menunggu konfirmasi dari beberapa timeframe sebelum masuk, dan punya mekanisme penahan saat harga bergerak melawan posisi.',
+      list: ['Entry hanya saat beberapa timeframe searah', 'Penahan otomatis (lock) saat floating mencapai batas, dibuka kembali saat harga berbalik', 'Satu target profit per kelompok posisi, ditutup bersamaan', 'Membatasi jumlah posisi searah agar tidak menumpuk'],
+      spec: [['Pair', 'XAUUSD'], ['Timeframe', 'M1'], ['Akun', 'Hedging'], ['Modal disarankan', 'mulai $500']]
+    },
+    eleven: {
+      badge: 'Terlaris',
+      text: 'Sebelas mesin analisa bekerja masing-masing: momentum, trend, breakout, hingga pantulan support dan resistance. Tiap mesin mengelola posisinya sendiri.',
+      list: ['11 mesin analisa dengan posisi terpisah', 'Tidak masuk di ujung gerakan yang sudah terlalu jauh', 'Istirahat otomatis saat berita berdampak tinggi dan jam rollover', 'Batas posisi searah dan batas total lot'],
+      spec: [['Pair', 'XAUUSD'], ['Timeframe', 'M1'], ['Akun', 'Hedging'], ['Modal disarankan', 'mulai $200']]
+    }
+  };
+  var ORDER = ['moving', 'eleven', 'trial'];
+  var state = { key: null, tg: false };
+
+  function rp(n) { return n === 0 ? 'Gratis' : 'Rp' + n.toLocaleString('id-ID'); }
+  function off(p, s) { return s > p ? Math.round((1 - p / s) * 100) : 0; }
+
+  var html = '';
+  ORDER.forEach(function (k) {
+    var p = P[k], d = DESC[k], o = off(p.price, p.strike);
+    html += '<div class="opt" data-k="' + k + '">' +
+      '<button class="opt-top" role="radio" aria-checked="false" type="button">' +
+        '<span class="radio" aria-hidden="true"></span>' +
+        '<span><span class="nm">' + p.name + (d.badge ? '<span class="badge">' + d.badge + '</span>' : '') + '</span><span class="per">' + p.period + '</span></span>' +
+        '<span class="price num">' + (p.strike ? '<s>' + rp(p.strike) + '</s>' : '') + '<b>' + rp(p.price) + '</b>' + (o ? '<span class="off">Hemat ' + o + '%</span>' : '') + '</span>' +
+      '</button>' +
+      '<div class="opt-body"><div><div class="opt-inner">' +
+        '<details class="explain" open><summary>Penjelasan ' + p.name + '</summary>' +
+          '<p>' + d.text + '</p><ul>' + d.list.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' +
+          '<dl class="spec">' + d.spec.map(function (x) { return '<div><dt>' + x[0] + '</dt><dd>' + x[1] + '</dd></div>'; }).join('') + '</dl>' +
+        '</details>' +
+        (p.allowTg
+          ? '<label class="addon"><input type="checkbox" class="tg"><span class="sw" aria-hidden="true"></span><span><b>Tambah bot notifikasi Telegram</b><span class="t">Notif profit/loss, status berhenti, dan pengingat lisensi</span></span>' +
+            '<span class="ap num">' + (TG.strike ? '<s>' + rp(TG.strike) + '</s>' : '') + '+' + rp(TG.price) + '</span></label>'
+          : '<div class="addon disabled"><span class="sw" aria-hidden="true"></span><span><b>Bot notifikasi Telegram</b><span class="t">Tidak tersedia untuk paket trial</span></span></div>') +
+      '</div></div></div></div>';
+  });
+  document.getElementById('opts').innerHTML = html;
+
+  function select(k) {
+    if (state.key !== k) state.tg = false;
+    state.key = k;
+    document.querySelectorAll('.opt').forEach(function (el) {
+      var on = el.dataset.k === k;
+      el.classList.toggle('on', on);
+      el.querySelector('.opt-top').setAttribute('aria-checked', on ? 'true' : 'false');
+      var cb = el.querySelector('input.tg');
+      if (cb) cb.checked = on && state.tg;
+    });
+    render();
+  }
+
+  function render() {
+    var buy = document.getElementById('buy'), buy2 = document.getElementById('buy2');
+    if (!state.key) return;
+    var p = P[state.key];
+    var tg = state.tg && p.allowTg;
+    var total = p.price + (tg ? TG.price : 0);
+    var normal = (p.strike || p.price) + (tg ? (TG.strike || TG.price) : 0);
+    document.getElementById('sName').textContent = p.name;
+    document.getElementById('sPrice').textContent = rp(p.price);
+    document.getElementById('sTgRow').hidden = !tg;
+    document.getElementById('sTg').textContent = '+' + rp(TG.price);
+    document.getElementById('sTotal').textContent = rp(total);
+    document.getElementById('sSave').textContent = normal > total ? 'Hemat ' + rp(normal - total) + ' dari harga normal' : '';
+    document.getElementById('bName').textContent = p.name + (tg ? ' + Telegram' : '');
+    document.getElementById('bTotal').textContent = rp(total);
+    var label = p.price === 0 ? 'Ambil trial' : 'Aku mau';
+    buy.textContent = label; buy2.textContent = label;
+    buy.disabled = buy2.disabled = false;
+  }
+
+  function checkout() {
+    if (!state.key) return;
+    var p = P[state.key];
+    var url = (state.tg && p.allowTg && p.linkTg) ? p.linkTg : p.link;
+    window.location.href = url;
+  }
+
+  document.getElementById('opts').addEventListener('click', function (e) {
+    var top = e.target.closest('.opt-top');
+    if (top) select(top.parentNode.dataset.k);
+  });
+  document.getElementById('opts').addEventListener('change', function (e) {
+    if (e.target.classList.contains('tg')) { state.tg = e.target.checked; render(); }
+  });
+  document.getElementById('buy').onclick = checkout;
+  document.getElementById('buy2').onclick = checkout;
+  document.querySelectorAll('[data-pick]').forEach(function (a) { a.addEventListener('click', function () { select(a.dataset.pick); }); });
+
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  var wa = document.getElementById('waFoot');
+  wa.href = 'https://wa.me/' + CONFIG.waAdmin + '?text=' + encodeURIComponent('Halo admin Falcora, saya mau tanya tentang EA Falcora.');
+
+  // pilih otomatis dari link, misal halaman.html#eleven
+  var h = location.hash.replace('#', '');
+  if (P[h]) select(h);
+})();
+</script>
+</body>
+</html>

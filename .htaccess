@@ -1,0 +1,23 @@
+# Untuk hosting Apache/cPanel (GitHub Pages TIDAK membaca file ini, tapi tidak masalah ikut diunggah)
+Options -Indexes
+DirectoryIndex index.html
+RewriteEngine On
+
+# paksa https
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# /index.html -> /
+RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.html[\s?] [NC]
+RewriteRule ^(.*/)?index\.html$ /$1 [R=301,L]
+
+# /halaman.html -> /halaman
+RewriteCond %{THE_REQUEST} \s/+(.+?)\.html[\s?] [NC]
+RewriteRule ^ /%1 [R=301,L]
+
+# /halaman -> halaman.html (tanpa terlihat di alamat)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.+?)/?$ $1.html [L]
+
+ErrorDocument 404 /404.html
