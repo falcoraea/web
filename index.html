@@ -11,8 +11,9 @@
 <script>
 /* =====================================================================
    PENGATURAN
-   - apiUrl : URL Web App Apps Script (formulir + pembayaran + lisensi)
-   - Harga resmi diambil dari Code.gs (PRICES & ADDONS). Angka di bawah
+   - apiUrl : URL Web App Apps Script. Hanya ini yang perlu diisi.
+   - Harga, harga coret, add-on, dan nomor WhatsApp admin diambil
+     otomatis dari sheet "Pengaturan" di spreadsheet. Angka di bawah
      hanya cadangan jika Apps Script belum bisa dihubungi.
    ===================================================================== */
 var CONFIG = {
@@ -558,6 +559,7 @@ var CONFIG = {
   // harga resmi dari server (Code.gs)
   jsonp({ action: 'harga' }, function (r) {
     if (r && r.ok && r.prices) { P = CONFIG.prices = r.prices; A = CONFIG.addons = r.addons || A; build(); }
+    if (r && r.wa) { CONFIG.waAdmin = r.wa; document.getElementById('waFoot').href = 'https://wa.me/' + r.wa + '?text=' + encodeURIComponent('Halo admin Falcora, saya mau tanya tentang EA Falcora.'); }
   });
 })();
 </script>
