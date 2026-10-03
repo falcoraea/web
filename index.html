@@ -22,7 +22,7 @@ var CONFIG = {
     MOVING: { name: 'Falcora Moving', price: 290000, normal: 590000, months: 6 },
     ELEVEN: { name: 'Falcora Eleven', price: 290000, normal: 590000, months: 6 },
     CORE:   { name: 'Falcora Core',   price: 490000, normal: 990000, months: 6 },
-    TRIAL:  { name: 'Trial semua EA', price: 0, normal: 0, days: 2 }
+    TRIAL:  { name: 'Trial semua EA', price: 17000, normal: 0, days: 2 }
   },
   addons: {
     tg:  { name: 'Bot notifikasi Telegram', price: 49000, normal: 99000 },
@@ -248,12 +248,12 @@ var CONFIG = {
       <p class="lead">Falcora berjalan otomatis di MetaTrader 5 kamu. Target harian, batas rugi, dan money management kamu atur sendiri, dan semuanya terlihat jelas di satu panel.</p>
       <div class="hero-cta">
         <a class="btn btn-gold" href="#produk">Lihat harga</a>
-        <a class="btn btn-ghost" href="#produk" data-pick="TRIAL">Coba gratis 2 hari</a>
+        <a class="btn btn-ghost" href="#produk" data-pick="TRIAL">Trial 2 hari</a>
       </div>
       <div class="facts">
         <div><b>XAUUSD</b>Pair utama</div>
         <div><b>MetaTrader 5</b>Akun tipe hedging</div>
-        <div><b>Trial 2 hari</b>Gratis, semua EA</div>
+        <div><b>Trial 2 hari</b>Semua EA, Rp17.000</div>
       </div>
     </div>
 
@@ -312,13 +312,13 @@ var CONFIG = {
   <div class="wrap">
     <div class="sec-head">
       <h2>Dari bayar sampai EA jalan</h2>
-      <p class="sub">Biasanya selesai di hari yang sama.</p>
+      <p class="sub">Biasanya selesai dalam hitungan menit.</p>
     </div>
     <ol class="flow">
       <li><h3>Pilih dan bayar</h3><p>Pilih EA dan tambahan, isi nama, email, dan WhatsApp, lalu selesaikan pembayaran.</p></li>
       <li><h3>Isi formulir</h3><p>Setelah membayar kamu langsung diarahkan ke formulir. Masukkan ID akun MT5 dan data Telegram bila ada.</p></li>
-      <li><h3>Lisensi diaktifkan</h3><p>Admin mengonfirmasi pembayaran, lisensi aktif 6 bulan. Trial langsung aktif.</p></li>
-      <li><h3>Pasang di MT5</h3><p>Pasang file EA di chart XAUUSD. Panel akan menampilkan lisensi aktif.</p></li>
+      <li><h3>Lisensi aktif</h3><p>Pembayaran diverifikasi otomatis, lisensi langsung aktif dan link unduh EA muncul.</p></li>
+      <li><h3>Pasang di MT5</h3><p>Unduh file EA, pasang di chart XAUUSD. Panel akan menampilkan lisensi aktif.</p></li>
     </ol>
   </div>
 </section>
@@ -354,7 +354,7 @@ var CONFIG = {
       <details><summary>Broker apa yang bisa dipakai?</summary><p>Broker apa saja yang menyediakan MetaTrader 5 dengan akun tipe hedging (posisi BUY dan SELL bisa terbuka bersamaan), misalnya Exness. Akun netting tidak bisa dipakai.</p></details>
       <details><summary>Satu lisensi bisa untuk berapa akun?</summary><p>Satu lisensi untuk satu ID akun MT5. Jika ingin bisa pindah ke akun lain, tambahkan <b>Bisa ganti akun</b> saat membeli. Pemindahan dilakukan sendiri di halaman formulir.</p></details>
       <details><summary>Apa bedanya bot notifikasi dan bot setting?</summary><p>Bot notifikasi mengirim laporan ke Telegram kamu lewat bot Falcora: profit/loss, EA berhenti atau berjalan lagi, dan pengingat lisensi. Bot setting memakai bot pribadimu sendiri, berisi laporan yang sama ditambah menu kendali: nyalakan atau matikan trading, lihat floating, ringkasan, dan tutup posisi.</p></details>
-      <details><summary>Apa isi paket trial?</summary><p>Trial gratis 2 hari untuk semua EA (Moving, Eleven, dan Core) di satu akun MT5. Setiap akun hanya bisa memakai trial satu kali. Tambahan tidak tersedia untuk trial.</p></details>
+      <details><summary>Apa isi paket trial?</summary><p>Trial 2 hari untuk semua EA (Moving, Eleven, dan Core) di satu akun MT5 dengan biaya Rp17.000 untuk server cloud dan maintenance. Setiap akun hanya bisa memakai trial satu kali. Tambahan tidak tersedia untuk trial.</p></details>
       <details><summary>Apakah bisa di-backtest?</summary><p>Tidak. Falcora hanya berjalan di akun demo atau real yang lisensinya aktif. Gunakan trial 2 hari untuk mencoba langsung di akun demo.</p></details>
       <details><summary>Komputer harus menyala terus?</summary><p>Ya, MetaTrader 5 harus tetap terbuka dan terhubung internet. Untuk berjalan 24 jam, kami sarankan memakai VPS.</p></details>
       <details><summary>Bagaimana cara perpanjang lisensi?</summary><p>Beli paket yang sama lagi di halaman ini, lalu isi formulir dengan ID akun yang sama. Masa aktif ditambah 6 bulan dari tanggal berakhir lisensi sebelumnya.</p></details>
@@ -418,9 +418,9 @@ var CONFIG = {
       spec: [['Pair', 'XAUUSD'], ['Timeframe', 'M1'], ['Akun', 'Hedging'], ['Lisensi', '6 bulan']]
     },
     TRIAL: {
-      badge: 'Gratis', period: '2 hari, semua EA, 1 akun',
-      text: 'Coba semua EA Falcora di akun kamu sendiri sebelum membeli.',
-      list: ['Akses Falcora Moving, Eleven, dan Core', 'Langsung aktif setelah mengisi formulir', 'Satu kali per akun MT5, disarankan di akun demo'],
+      badge: 'Coba dulu', period: '2 hari, semua EA, 1 akun',
+      text: 'Coba semua EA Falcora di akun kamu sendiri sebelum membeli. Biaya trial dipakai untuk server cloud dan maintenance.',
+      list: ['Akses Falcora Moving, Eleven, dan Core', 'Aktif otomatis setelah pembayaran dan formulir selesai', 'Satu kali per akun MT5, disarankan di akun demo'],
       spec: [['Pair', 'XAUUSD'], ['Platform', 'MT5'], ['Akun', 'Hedging'], ['Masa', '2 hari']]
     }
   };
@@ -494,7 +494,7 @@ var CONFIG = {
     document.getElementById('sSave').textContent = c.normal > c.total ? 'Hemat ' + rp(c.normal - c.total) + ' dari harga normal' : '';
     document.getElementById('bName').textContent = p.name + (c.lines.length ? ' + ' + c.lines.length + ' add-on' : '');
     document.getElementById('bTotal').textContent = rp(c.total);
-    var label = state.key === 'TRIAL' ? 'Ambil trial gratis' : 'Aku mau';
+    var label = state.key === 'TRIAL' ? 'Ambil trial' : 'Aku mau';
     ['buy', 'buy2'].forEach(function (id) { var b = document.getElementById(id); b.textContent = label; b.disabled = false; });
   }
 
@@ -512,7 +512,6 @@ var CONFIG = {
   function closeModal() { modal.classList.remove('on'); }
   function checkout() {
     if (!state.key) return;
-    if (state.key === 'TRIAL') { window.location.href = CONFIG.apiUrl + '?prod=TRIAL'; return; }
     openModal();
   }
   function jsonp(params, cb) {
