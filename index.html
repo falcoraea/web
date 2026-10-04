@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Falcora: robot trading XAUUSD untuk MetaTrader 5</title>
-<meta name="description" content="Falcora Moving dan Falcora Eleven, Expert Advisor XAUUSD untuk MetaTrader 5 dengan panel proteksi: daily target, equity quit, money management, dan daily loss.">
+<meta name="description" content="Falcora Moving dan Falcora Eleven, Expert Advisor XAUUSD (juga bisa untuk pair forex) untuk MetaTrader 5 dengan panel proteksi: daily target, equity quit, money management, dan daily loss.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -63,7 +63,7 @@ var CONFIG = {
   h1{font-size:clamp(34px,5vw,56px);line-height:1.08;letter-spacing:-.02em;font-weight:800;margin:0 0 20px;max-width:13ch}
   .lead{font-size:18px;color:#b9c4da;max-width:46ch;margin:0 0 30px}
   .hero-cta{display:flex;gap:12px;flex-wrap:wrap}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;font:700 15px "Plus Jakarta Sans";padding:14px 22px;border-radius:999px;text-decoration:none}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;font:700 15px "Plus Jakarta Sans",system-ui,sans-serif;padding:14px 22px;border-radius:999px;text-decoration:none}
   .btn-gold{background:linear-gradient(140deg,var(--gold2),var(--gold));color:#1a1103}
   .btn-gold:hover{filter:brightness(1.05)}
   .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--line2)}
@@ -201,6 +201,48 @@ var CONFIG = {
   footer{padding:40px 0 120px;color:#56688f;font-size:14px}
   footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
+  button{font-family:inherit}
+  /* ---- Promo ---- */
+  .promo-bar{display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px;margin:0 0 18px;padding:16px 20px;border-radius:var(--r-lg);
+             border:1px solid var(--gold);background:linear-gradient(120deg,rgba(240,176,48,.16),rgba(240,176,48,.03) 60%)}
+  .promo-bar b{font-size:17px}
+  .promo-bar .pb-t{flex:1 1 260px;min-width:0}
+  .promo-bar .pb-t span{display:block;color:#c9d3e6;font-size:14px}
+  .promo-bar .slot{font-weight:800;color:var(--gold2);font-size:14px;white-space:nowrap}
+  .promo-bar .btn{padding:10px 18px}
+  .opt.promo{border-color:rgba(240,176,48,.55);background:linear-gradient(160deg,rgba(240,176,48,.10),var(--ink) 55%)}
+  .opt.soldout{opacity:.55}
+  .opt.soldout .opt-top{cursor:not-allowed}
+  .badge.hot{background:#f05a66;color:#fff}
+  .eapick{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  .eab{flex:1 1 120px;border:1px solid var(--line2);background:#0a1328;color:var(--text);border-radius:var(--r-md);padding:12px 10px;font-weight:700;font-size:14px;cursor:pointer}
+  .eab.on{border-color:var(--gold);background:rgba(240,176,48,.12);color:var(--gold2)}
+  .eab:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
+  .addon.bonus{border-style:solid;border-color:rgba(38,208,140,.45);background:rgba(38,208,140,.06);cursor:default}
+  .addon.bonus .sw{background:var(--profit)}
+  /* ---- Telegram ---- */
+  .tg{display:grid;grid-template-columns:1fr 1fr .95fr;gap:20px;align-items:start}
+  .tgc{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--ink);padding:22px 22px 18px}
+  .tgc .tag{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--gold);margin-bottom:6px}
+  .tgc h3{margin:0 0 4px;font-size:19px}
+  .tgc .pr{color:var(--mist);font-size:14px;margin:0 0 14px}
+  .tgc ul{list-style:none;margin:0;padding:0}
+  .tgc li{padding:9px 0;border-top:1px solid var(--line);font-size:14.5px;color:#c9d3e6;display:flex;gap:10px}
+  .tgc li b{color:var(--text);font-weight:700;white-space:nowrap}
+  .tgc code{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--gold2)}
+  .chat{border-radius:var(--r-lg);background:#0e1f17;border:1px solid #1f3a2c;padding:16px;display:grid;gap:10px}
+  .bub{background:#fff;color:#16213a;border-radius:14px 14px 14px 4px;padding:12px 12px 8px;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+  .bub h4{margin:0 0 8px;font-size:15px}
+  .bub table{width:100%;border-collapse:collapse;border:1px solid #dfe5ef;border-radius:8px;overflow:hidden}
+  .bub td{padding:6px 8px;border-top:1px solid #e7ecf3}
+  .bub tr:nth-child(odd) td{background:#f5f7fb}
+  .bub td:first-child{font-weight:700;width:46%}
+  .bub .ft{color:#7a869c;font-size:11px;margin-top:6px}
+  .kb{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .kb span{display:block;text-align:center;font-size:12.5px;font-weight:700;color:#fff;border-radius:8px;padding:8px 4px}
+  .kb .g{background:#3aa65a}.kb .r{background:#b6634a}.kb .b{background:#4a8fa8}
+  .tgnote{margin-top:22px;color:var(--mist);font-size:14px;max-width:820px}
+  @media (max-width:960px){ .tg{grid-template-columns:1fr} }
   @media (max-width:960px){
     .hero .wrap{grid-template-columns:1fr}
     .mt5{max-width:320px}
@@ -237,7 +279,7 @@ var CONFIG = {
 <nav>
   <div class="wrap">
     <a class="logo" href="#"><i><svg width="18" height="18" viewBox="0 0 24 24"><path d="M3 15c4-1 7-4 9-9 1 4 4 6 9 6-4 2-7 3-9 7-1-3-4-4-9-4z" fill="#1a1103"/></svg></i>FALCORA</a>
-    <div class="navlinks"><a href="#produk">Produk</a><a href="#cara">Cara beli</a><a href="#proteksi">Proteksi</a><a href="#faq">Tanya jawab</a></div>
+    <div class="navlinks"><a href="#produk">Produk</a><a href="#cara">Cara beli</a><a href="#proteksi">Proteksi</a><a href="#telegram">Telegram</a><a href="#faq">Tanya jawab</a></div>
     <a class="navbtn" href="#produk">Pilih EA</a>
   </div>
 </nav>
@@ -246,13 +288,13 @@ var CONFIG = {
   <div class="wrap">
     <div>
       <h1>Robot XAUUSD yang tahu kapan harus berhenti.</h1>
-      <p class="lead">Falcora berjalan otomatis di MetaTrader 5 kamu. Target harian, batas rugi, dan money management kamu atur sendiri, dan semuanya terlihat jelas di satu panel.</p>
+      <p class="lead">Falcora berjalan otomatis di MetaTrader 5 kamu, dioptimalkan untuk XAUUSD dan bisa juga dipakai di pair forex utama. Target harian, batas rugi, dan money management kamu atur sendiri, dan semuanya terlihat jelas di satu panel.</p>
       <div class="hero-cta">
         <a class="btn btn-gold" href="#produk">Lihat harga</a>
         <a class="btn btn-ghost" href="#produk" data-pick="TRIAL">Trial 2 hari</a>
       </div>
       <div class="facts">
-        <div><b>XAUUSD</b>Pair utama</div>
+        <div><b>XAUUSD</b>Pair utama, forex juga bisa</div>
         <div><b>MetaTrader 5</b>Akun tipe hedging</div>
         <div><b>Trial 2 hari</b>Semua EA, Rp17.000</div>
       </div>
@@ -293,6 +335,11 @@ var CONFIG = {
       <p class="sub">Lisensi 6 bulan untuk satu akun MT5. Tambahkan bot Telegram atau opsi ganti akun sesuai kebutuhan.</p>
     </div>
 
+    <div class="promo-bar" id="promoBar" hidden>
+      <div class="pb-t"><b id="pbName">Falcora Promo</b><span id="pbText"></span></div>
+      <span class="slot" id="pbSlot"></span>
+      <button class="btn btn-gold" type="button" id="pbGo">Ambil promo</button>
+    </div>
     <div class="picker">
       <div class="opts" id="opts" role="radiogroup" aria-label="Pilihan EA"></div>
 
@@ -319,7 +366,7 @@ var CONFIG = {
       <li><h3>Pilih dan bayar</h3><p>Pilih EA dan tambahan, isi nama, email, dan WhatsApp, lalu selesaikan pembayaran.</p></li>
       <li><h3>Isi formulir</h3><p>Setelah membayar kamu langsung diarahkan ke formulir. Masukkan ID akun MT5 dan data Telegram bila ada.</p></li>
       <li><h3>Lisensi aktif</h3><p>Pembayaran diverifikasi otomatis, lisensi langsung aktif dan link unduh EA muncul.</p></li>
-      <li><h3>Pasang di MT5</h3><p>Unduh file EA, pasang di chart XAUUSD. Panel akan menampilkan lisensi aktif.</p></li>
+      <li><h3>Pasang di MT5</h3><p>Unduh file EA, pasang di chart XAUUSD (pair utama) atau pair forex lain. Panel akan menampilkan lisensi aktif.</p></li>
     </ol>
   </div>
 </section>
@@ -337,7 +384,7 @@ var CONFIG = {
       <div><h3>Money Management</h3><p>Batas floating yang bisa dinyalakan atau dimatikan. Saat tersentuh, posisi ditutup lalu EA trading lagi setelah jeda menit yang kamu atur.</p></div>
       <div><h3>Daily Loss</h3><p>Batas rugi harian. Jika tersentuh, EA berhenti sampai hari berikutnya.</p></div>
       <div><h3>Batas loss per bot</h3><p>Khusus Falcora Core: bot yang menyentuh batas rugi istirahat sesuai menit yang kamu atur, bot lainnya tetap bekerja.</p></div>
-      <div><h3>Kendali dari Telegram</h3><p>Dengan bot setting, kamu bisa menyalakan atau mematikan trading, melihat floating, dan menutup posisi dari HP.</p></div>
+      <div><h3>Kendali dari Telegram</h3><p>Dengan bot setting, kamu bisa ON/OFF Algo Trading, PANIC tutup posisi, ganti lot dan setelan, serta melihat laporan dari HP.</p></div>
     </div>
     <div class="levels">
       <div><b>Aman</b><span>Posisi searah dibatasi, layer lebih sedikit. Cocok untuk modal kecil.</span></div>
@@ -347,16 +394,80 @@ var CONFIG = {
   </div>
 </section>
 
+<!-- ================= TELEGRAM ================= -->
+<section id="telegram">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Pantau dan kendalikan dari Telegram</h2>
+      <p class="sub">Dua pilihan tambahan. Pesannya berupa kartu dengan tabel rapi, bukan teks berantakan.</p>
+    </div>
+    <div class="tg">
+      <div class="tgc">
+        <span class="tag">BOT NOTIFIKASI</span>
+        <h3>Laporan otomatis</h3>
+        <p class="pr">Lewat bot resmi Falcora. Cukup tekan /start lalu isi ID Telegram di formulir.</p>
+        <ul>
+          <li><b>&#9989; PROFIT</b><span>Setiap basket profit, lengkap dengan layer, lot, durasi, dan PnL hari ini.</span></li>
+          <li><b>&#10060; LOSS</b><span>Setiap basket loss, supaya kamu tahu saat itu juga.</span></li>
+          <li><b>&#9940; Berhenti</b><span>EA berhenti karena Daily Target, Equity Quit, Daily Loss, atau Money Management, dan saat jalan lagi.</span></li>
+          <li><b>&#128197; Harian</b><span>Laporan PnL, winrate, basket terbesar, floating terdalam, dan saldo.</span></li>
+          <li><b>&#9203; Lisensi</b><span>Pengingat 3 hari sebelum masa aktif habis.</span></li>
+          <li><b>&#128101; 6 ID</b><span>Kirim ke sampai 6 akun Telegram sekaligus, misalnya kamu dan partner.</span></li>
+        </ul>
+      </div>
+      <div class="tgc">
+        <span class="tag">BOT SETTING</span>
+        <h3>Panel kendali di HP</h3>
+        <p class="pr">Bot pribadimu sendiri. Semua laporan di samping, ditambah menu:</p>
+        <ul>
+          <li><code>/kontrol</code><span>ON/OFF Algo Trading MT5 dan PANIC tutup semua posisi.</span></li>
+          <li><code>/status</code><span>Status EA, lisensi, proteksi aktif, saldo, dan equity.</span></li>
+          <li><code>/laporan</code><span>PnL, winrate, profit dan loss terbesar: hari ini, kemarin, minggu, bulan.</span></li>
+          <li><code>/posisi</code><span>Floating per basket: arah, layer, lot.</span></li>
+          <li><code>/floating</code><span>10 floating terdalam hari ini, lengkap dengan jamnya.</span></li>
+          <li><code>/lot</code><span>Ganti lot langsung dari HP.</span></li>
+          <li><code>/setelan</code><span>Pindah AMAN, AGRESIF, atau LIAR.</span></li>
+        </ul>
+      </div>
+      <div class="chat" aria-hidden="true">
+        <div class="bub">
+          <h4>&#9989; PROFIT +2.15 USD</h4>
+          <table>
+            <tr><td>Basket</td><td>Moving #2 BUY</td></tr>
+            <tr><td>Layer / lot</td><td>3 layer &bull; 0.03 lot</td></tr>
+            <tr><td>Durasi</td><td>18 menit</td></tr>
+            <tr><td>PnL hari ini</td><td>&#128994; +24.60 USD</td></tr>
+          </table>
+          <div class="ft">CORE XAU &bull; FALCORA CORE &bull; AMAN &bull; XAUUSD</div>
+        </div>
+        <div class="bub">
+          <h4>&#127899; Kontrol</h4>
+          <table>
+            <tr><td>Pair</td><td>CORE XAU &bull; XAUUSD</td></tr>
+            <tr><td>Algo Trading</td><td>&#128994; ON</td></tr>
+            <tr><td>Floating total</td><td>&#128308; -3.15 USD</td></tr>
+          </table>
+        </div>
+        <div class="kb"><span class="g">&#128994; ON</span><span class="r">&#128308; OFF</span><span class="r">&#128680; PANIC</span><span class="b">&#128260; Refresh</span></div>
+      </div>
+    </div>
+    <p class="tgnote" id="chNote" hidden>&#128226; Ikuti <a id="chLink" href="#" target="_blank" rel="noopener" style="color:var(--gold2);font-weight:700">channel Telegram Falcora</a> untuk pengumuman, update EA, dan info promo.</p>
+    <p class="tgnote">Punya beberapa pair atau EA Falcora? Satu bot setting bisa dipakai untuk semuanya dalam satu PC/VPS. Setiap menu menampilkan pilihan pair lebih dulu, lalu data dan tombol untuk pair tersebut. Paket trial sudah termasuk kedua bot ini.</p>
+  </div>
+</section>
+
 <!-- ================= FAQ ================= -->
 <section id="faq">
   <div class="wrap">
     <div class="sec-head"><h2>Tanya jawab</h2></div>
     <div class="faq">
-      <details><summary>Broker apa yang bisa dipakai?</summary><p>Broker apa saja yang menyediakan MetaTrader 5 dengan akun tipe hedging (posisi BUY dan SELL bisa terbuka bersamaan), misalnya Exness. Akun netting tidak bisa dipakai.</p></details>
-      <details><summary>Satu lisensi bisa untuk berapa akun?</summary><p>Satu lisensi untuk satu ID akun MT5. Jika ingin bisa pindah ke akun lain, tambahkan <b>Bisa ganti akun</b> saat membeli. Pemindahan dilakukan sendiri di halaman formulir.</p></details>
-      <details><summary>Apa bedanya bot notifikasi dan bot setting?</summary><p>Bot notifikasi mengirim laporan ke Telegram kamu lewat bot Falcora: profit/loss, EA berhenti atau berjalan lagi, dan pengingat lisensi. Bot setting memakai bot pribadimu sendiri, berisi laporan yang sama ditambah menu kendali: nyalakan atau matikan trading, lihat floating, ringkasan, dan tutup posisi.</p></details>
-      <details><summary>Apa isi paket trial?</summary><p>Trial 2 hari untuk semua EA (Moving, Eleven, dan Core) di satu akun MT5 dengan biaya Rp17.000 untuk server cloud dan maintenance. Setiap akun hanya bisa memakai trial satu kali. Tambahan tidak tersedia untuk trial.</p></details>
-      <details><summary>Apakah bisa di-backtest?</summary><p>Tidak. Falcora hanya berjalan di akun demo atau real yang lisensinya aktif. Gunakan trial 2 hari untuk mencoba langsung di akun demo.</p></details>
+      <details><summary>Broker apa yang bisa dipakai?</summary><p>Broker apa saja yang menyediakan MetaTrader 5 dengan akun tipe <b>hedging</b> (posisi BUY dan SELL bisa terbuka bersamaan). Contohnya Exness, XM, FBS, Octa, HFM, IC Markets, Tickmill, Vantage, Pepperstone, dan FXTM. Pilih akun MT5 jenis hedging saat membuka akun; akun netting tidak bisa dipakai. Akun cent juga bisa, asalkan symbol emasnya tersedia (misalnya XAUUSDc).</p></details>
+      <details><summary>Pair apa saja yang bisa dipakai?</summary><p><b>XAUUSD adalah pair utama</b>: setelan bawaan Falcora dirancang dan diuji di emas. EA juga bisa dipasang di pair forex utama seperti EURUSD, GBPUSD, USDJPY, AUDUSD, dan USDCAD. Input <b>Jenis pair</b> (Otomatis) menyesuaikan jarak layer dan target per pair, dan tersedia template setelan forex untuk batas profit/rugi dalam dolar. Satu lisensi berlaku untuk semua pair di akun yang sama; pasang satu EA per chart.</p></details>
+      <details><summary>Satu lisensi bisa untuk berapa akun?</summary><p>Satu lisensi untuk satu ID akun MT5. Jika ingin bisa pindah ke akun lain, tambahkan <b>Bisa ganti akun</b> saat membeli. Pemindahan dilakukan sendiri di halaman formulir. Selama promo masih ada slot, paket <b>Falcora Promo</b> berlaku untuk beberapa akun sekaligus.</p></details>
+      <details><summary>Apakah ada grup untuk pembeli?</summary><p>Ada. Setelah pembayaran berhasil, link grup Telegram pembeli Falcora muncul di halaman pendaftaran dan dikirim ke email. Di grup ada info update EA, setelan, dan tanya jawab. Grup tidak termasuk paket trial.</p></details>
+      <details><summary>Apa bedanya bot notifikasi dan bot setting?</summary><p>Bot notifikasi mengirim laporan ke Telegram kamu lewat bot Falcora, bisa ke sampai 6 ID Telegram sekaligus: notif PROFIT atau LOSS setiap basket selesai, EA berhenti atau berjalan lagi, laporan harian, dan pengingat lisensi. Bot setting memakai bot pribadimu sendiri (dibuat gratis di @BotFather), berisi laporan yang sama ditambah menu kendali: ON/OFF Algo Trading, PANIC, status, laporan, posisi, 10 floating terdalam, ganti lot, dan ganti setelan.</p></details>
+      <details><summary>Bot setting perlu pengaturan khusus di MT5?</summary><p>Izinkan WebRequest untuk api.telegram.org, script.google.com, dan script.googleusercontent.com. Untuk tombol ON/OFF Algo Trading, centang juga "Allow DLL imports" saat memasang EA. Tanpa itu, EA dan laporan tetap jalan, hanya tombol ON/OFF yang tidak bisa dipakai.</p></details>
+      <details><summary>Apa isi paket trial?</summary><p>Trial 2 hari untuk semua EA (Moving, Eleven, dan Core) di satu akun MT5 dengan biaya Rp17.000 untuk server cloud dan maintenance. Bot notifikasi dan bot setting Telegram ikut aktif gratis selama trial. Setiap akun hanya bisa memakai trial satu kali.</p></details>
       <details><summary>Komputer harus menyala terus?</summary><p>Ya, MetaTrader 5 harus tetap terbuka dan terhubung internet. Untuk berjalan 24 jam, kami sarankan memakai VPS.</p></details>
       <details><summary>Bagaimana cara perpanjang lisensi?</summary><p>Beli paket yang sama lagi di halaman ini, lalu isi formulir dengan ID akun yang sama. Masa aktif ditambah 6 bulan dari tanggal berakhir lisensi sebelumnya.</p></details>
     </div>
@@ -372,6 +483,7 @@ var CONFIG = {
 <footer>
   <div class="wrap">
     <span>&copy; <span id="yr"></span> Falcora</span>
+    <a id="chFoot" href="#" target="_blank" rel="noopener" hidden>Channel Telegram Falcora</a>
     <a id="waFoot" href="#" target="_blank" rel="noopener">Hubungi admin lewat WhatsApp</a>
   </div>
 </footer>
@@ -404,28 +516,53 @@ var CONFIG = {
       badge: '', period: 'Lisensi 6 bulan, 1 akun',
       text: 'EA dengan gaya entry selektif. Posisi baru dibuka hanya saat beberapa pertimbangan sepakat ke arah yang sama, lalu dikelola sampai target tercapai.',
       list: ['Entry lebih sedikit, tapi lebih terpilih', 'Satu target profit untuk setiap kelompok posisi', 'Membatasi posisi searah agar tidak menumpuk', 'Panel proteksi lengkap di chart'],
-      spec: [['Pair', 'XAUUSD'], ['Timeframe', 'M1'], ['Akun', 'Hedging'], ['Lisensi', '6 bulan']]
+      spec: [['Pair', 'XAUUSD + forex'], ['Timeframe', 'M1'], ['Akun', 'Hedging'], ['Lisensi', '6 bulan']]
     },
     ELEVEN: {
       badge: 'Lebih aktif', period: 'Lisensi 6 bulan, 1 akun',
       text: 'EA dengan sebelas pertimbangan analisa yang bekerja bersamaan. Masing-masing mengelola posisinya sendiri, jadi peluang entry lebih banyak sepanjang hari.',
       list: ['Lebih banyak peluang entry setiap hari', 'Tidak mengejar harga yang sudah bergerak terlalu jauh', 'Istirahat otomatis saat berita berdampak tinggi', 'Batas posisi searah dan batas total lot'],
-      spec: [['Pair', 'XAUUSD'], ['Timeframe', 'M1'], ['Akun', 'Hedging'], ['Lisensi', '6 bulan']]
+      spec: [['Pair', 'XAUUSD + forex'], ['Timeframe', 'M1'], ['Akun', 'Hedging'], ['Lisensi', '6 bulan']]
     },
     CORE: {
       badge: 'Terlengkap', period: 'Lisensi 6 bulan, 1 akun',
       text: 'Falcora Moving dan Falcora Eleven dalam satu EA. Kedua bot bekerja berdampingan, masing-masing dengan batas rugi sendiri.',
       list: ['Dua bot dalam satu chart', 'Bot yang menyentuh batas rugi istirahat sementara, bot lain tetap bekerja', 'Berhenti total hanya saat target harian, daily loss, atau equity quit tercapai', 'Lebih hemat dibanding membeli dua EA terpisah'],
-      spec: [['Pair', 'XAUUSD'], ['Timeframe', 'M1'], ['Akun', 'Hedging'], ['Lisensi', '6 bulan']]
+      spec: [['Pair', 'XAUUSD + forex'], ['Timeframe', 'M1'], ['Akun', 'Hedging'], ['Lisensi', '6 bulan']]
     },
     TRIAL: {
       badge: 'Coba dulu', period: '2 hari, semua EA, 1 akun',
       text: 'Coba semua EA Falcora di akun kamu sendiri sebelum membeli. Biaya trial dipakai untuk server cloud dan maintenance.',
-      list: ['Akses Falcora Moving, Eleven, dan Core', 'Aktif otomatis setelah pembayaran dan formulir selesai', 'Satu kali per akun MT5, disarankan di akun demo'],
-      spec: [['Pair', 'XAUUSD'], ['Platform', 'MT5'], ['Akun', 'Hedging'], ['Masa', '2 hari']]
+      list: ['Akses Falcora Moving, Eleven, dan Core', 'Gratis bot notifikasi dan bot setting Telegram selama trial', 'Aktif otomatis setelah pembayaran dan formulir selesai', 'Satu kali per akun MT5, disarankan di akun demo'],
+      spec: [['Pair', 'XAUUSD + forex'], ['Platform', 'MT5'], ['Akun', 'Hedging'], ['Masa', '2 hari']]
     }
   };
   var state = { key: null, add: { tg: false, adm: false, ga: false } };
+  var EA_NAME = { ALL: 'semua EA Falcora (Moving, Eleven, dan Core)', CORE: 'Falcora Core', MOVING: 'Falcora Moving', ELEVEN: 'Falcora Eleven' };
+  function keys() { return KEYS.concat(P.PROMO ? ['PROMO'] : []); }
+  var EA_SHORT = { MOVING: 'Moving', ELEVEN: 'Eleven', CORE: 'Core' };
+  function promoEas() { return (P.PROMO && P.PROMO.eas && P.PROMO.eas.length) ? P.PROMO.eas : ['MOVING', 'ELEVEN', 'CORE']; }
+  function eaList() { return promoEas().map(function (e) { return EA_SHORT[e]; }).join(', ').replace(/, ([^,]*)$/, ', atau $1'); }
+  function addonsOf(k) { return k === 'TRIAL' ? [] : (k === 'PROMO' ? ['tg', 'adm'] : ['tg', 'adm', 'ga']); }
+  function soldOut(k) { return k === 'PROMO' && P.PROMO && P.PROMO.sisa <= 0; }
+  function promoDesc() {
+    var q = P.PROMO, n = q.accounts || 3, one = promoEas().length === 1;
+    var ea = one ? 'Falcora ' + EA_SHORT[promoEas()[0]] : 'satu EA pilihanmu (' + eaList() + ')';
+    if (!state.ea || promoEas().indexOf(state.ea) < 0) state.ea = promoEas()[promoEas().length - 1];
+    DESC.PROMO = {
+      badge: q.sisa > 0 ? 'Sisa ' + q.sisa + ' slot' : 'Slot habis', hot: true,
+      period: 'Lisensi ' + (q.months || 6) + ' bulan, ' + n + ' akun MT5, 1 EA',
+      text: 'Paket hemat untuk ' + n + ' akun trading sekaligus dengan ' + ea + '. Hanya ' + q.slot + ' slot, harga naik setelah slot habis.',
+      list: ['Lisensi untuk ' + n + ' akun MT5 berbeda', one ? 'Berisi ' + ea : 'Pilih satu EA: ' + eaList() + ', berlaku untuk semua akun di paket', 'Daftarkan akun satu per satu dengan link formulir yang sama', 'Akses grup Telegram pembeli Falcora'],
+      spec: [['Akun', n + ' akun'], ['EA', one ? EA_SHORT[promoEas()[0]] : 'Pilih 1'], ['Lisensi', (q.months || 6) + ' bulan'], ['Slot', q.sisa + ' / ' + q.slot]]
+    };
+    var bar = document.getElementById('promoBar');
+    bar.hidden = false;
+    document.getElementById('pbName').textContent = '\ud83d\udd25 ' + q.name + ' ' + rp(q.price) + (q.normal ? ' (normal ' + rp(q.normal) + ')' : '');
+    document.getElementById('pbText').textContent = n + ' akun MT5 dengan ' + ea + ', lisensi ' + (q.months || 6) + ' bulan.';
+    document.getElementById('pbSlot').textContent = q.sisa > 0 ? 'Sisa ' + q.sisa + ' dari ' + q.slot + ' slot' : 'Slot habis';
+    document.getElementById('pbGo').disabled = q.sisa <= 0;
+  }
 
   function rp(n) { return n === 0 ? 'Gratis' : 'Rp' + Math.round(n).toLocaleString('id-ID'); }
   function off(p, s) { return s > p ? Math.round((1 - p / s) * 100) : 0; }
@@ -434,12 +571,13 @@ var CONFIG = {
 
   function build() {
     var html = '';
-    KEYS.forEach(function (k) {
+    if (P.PROMO) promoDesc(); else document.getElementById('promoBar').hidden = true;
+    keys().forEach(function (k) {
       var p = P[k], d = DESC[k], o = off(p.price, p.normal);
-      html += '<div class="opt" data-k="' + k + '">' +
+      html += '<div class="opt' + (k === 'PROMO' ? ' promo' : '') + (soldOut(k) ? ' soldout' : '') + '" data-k="' + k + '">' +
         '<button class="opt-top" role="radio" aria-checked="false" type="button">' +
           '<span class="radio" aria-hidden="true"></span>' +
-          '<span><span class="nm">' + p.name + (d.badge ? '<span class="badge">' + d.badge + '</span>' : '') + '</span><span class="per">' + d.period + '</span></span>' +
+          '<span><span class="nm">' + p.name + (d.badge ? '<span class="badge' + (d.hot ? ' hot' : '') + '">' + d.badge + '</span>' : '') + '</span><span class="per">' + d.period + '</span></span>' +
           '<span class="price num">' + (p.normal ? '<s>' + rp(p.normal) + '</s>' : '') + '<b>' + rp(p.price) + '</b>' + (o ? '<span class="off">Hemat ' + o + '%</span>' : '') + '</span>' +
         '</button>' +
         '<div class="opt-body"><div><div class="opt-inner">' +
@@ -447,11 +585,16 @@ var CONFIG = {
             '<p>' + d.text + '</p><ul>' + d.list.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' +
             '<dl class="spec">' + d.spec.map(function (x) { return '<div><dt>' + x[0] + '</dt><dd>' + x[1] + '</dd></div>'; }).join('') + '</dl>' +
           '</details>' +
+          (k === 'PROMO' && promoEas().length > 1
+            ? '<div class="addons-title">Pilih EA</div><div class="eapick" role="radiogroup" aria-label="EA promo">' + promoEas().map(function (e) {
+                return '<button type="button" class="eab' + (state.ea === e ? ' on' : '') + '" data-ea="' + e + '" aria-pressed="' + (state.ea === e) + '">Falcora ' + EA_SHORT[e] + '</button>';
+              }).join('') + '</div>'
+            : '') +
           (k === 'TRIAL'
-            ? '<div class="addon disabled"><span class="sw" aria-hidden="true"></span><span><b>Add-on</b><span class="t">Tidak tersedia untuk trial</span></span></div>'
-            : '<div class="addons-title">Tambahan</div>' + ['tg', 'adm', 'ga'].map(function (a) {
-                var sub = a === 'tg' ? 'Laporan profit/loss dan status EA lewat bot Falcora'
-                        : a === 'adm' ? 'Bot pribadimu: nyalakan/matikan trading, lihat floating, tutup posisi, plus laporan'
+            ? '<div class="addon bonus"><span class="sw" aria-hidden="true"></span><span><b>Bonus trial</b><span class="t">Bot notifikasi dan bot setting Telegram sudah termasuk, gratis</span></span></div>'
+            : '<div class="addons-title">Tambahan' + (k === 'PROMO' ? ' (berlaku untuk semua akun di paket)' : '') + '</div>' + addonsOf(k).map(function (a) {
+                var sub = a === 'tg' ? 'Notif PROFIT / LOSS tiap basket, status EA, laporan harian lewat bot Falcora'
+                        : a === 'adm' ? 'Bot pribadimu: ON/OFF Algo, PANIC, ganti lot & setelan, laporan, 10 floating terdalam'
                         : 'Pindahkan lisensi ke akun MT5 lain kapan saja';
                 return '<label class="addon"><input type="checkbox" data-a="' + a + '"><span class="sw" aria-hidden="true"></span>' +
                   '<span><b>' + A[a].name + '</b><span class="t">' + sub + '</span></span>' +
@@ -464,6 +607,7 @@ var CONFIG = {
   }
 
   function select(k, keep) {
+    if (soldOut(k)) return;
     if (state.key !== k && !keep) state.add = { tg: false, adm: false, ga: false };
     state.key = k;
     document.querySelectorAll('.opt').forEach(function (el) {
@@ -477,7 +621,7 @@ var CONFIG = {
 
   function calc() {
     var p = P[state.key], total = p.price, normal = p.normal || p.price, lines = [];
-    if (state.key !== 'TRIAL') ['tg', 'adm', 'ga'].forEach(function (a) {
+    addonsOf(state.key).forEach(function (a) {
       if (!state.add[a]) return;
       var v = addPrice(a, state.key); total += v; normal += addNormal(a, state.key);
       lines.push([A[a].name, v]);
@@ -485,17 +629,19 @@ var CONFIG = {
     return { total: total, normal: normal, lines: lines };
   }
 
+  function pname() { var p = P[state.key]; return state.key === 'PROMO' ? p.name + ' - Falcora ' + EA_SHORT[state.ea] : p.name; }
+
   function render() {
     if (!state.key) return;
     var p = P[state.key], c = calc();
-    document.getElementById('sName').textContent = p.name;
+    document.getElementById('sName').textContent = pname();
     document.getElementById('sPrice').textContent = rp(p.price);
     document.getElementById('sAdd').innerHTML = c.lines.map(function (l) { return '<div class="line muted"><span>' + l[0] + '</span><span class="num">+' + rp(l[1]) + '</span></div>'; }).join('');
     document.getElementById('sTotal').textContent = rp(c.total);
     document.getElementById('sSave').textContent = c.normal > c.total ? 'Hemat ' + rp(c.normal - c.total) + ' dari harga normal' : '';
-    document.getElementById('bName').textContent = p.name + (c.lines.length ? ' + ' + c.lines.length + ' add-on' : '');
+    document.getElementById('bName').textContent = pname() + (c.lines.length ? ' + ' + c.lines.length + ' add-on' : '');
     document.getElementById('bTotal').textContent = rp(c.total);
-    var label = state.key === 'TRIAL' ? 'Ambil trial' : 'Aku mau';
+    var label = state.key === 'TRIAL' ? 'Ambil trial' : (state.key === 'PROMO' ? 'Ambil promo' : 'Aku mau');
     ['buy', 'buy2'].forEach(function (id) { var b = document.getElementById(id); b.textContent = label; b.disabled = false; });
   }
 
@@ -503,7 +649,7 @@ var CONFIG = {
   var modal = document.getElementById('modal');
   function openModal() {
     var p = P[state.key], c = calc();
-    document.getElementById('mSum').innerHTML = '<div class="mline"><span>' + p.name + '</span><span>' + rp(p.price) + '</span></div>' +
+    document.getElementById('mSum').innerHTML = '<div class="mline"><span>' + pname() + '</span><span>' + rp(p.price) + '</span></div>' +
       c.lines.map(function (l) { return '<div class="mline"><span>' + l[0] + '</span><span>+' + rp(l[1]) + '</span></div>'; }).join('') +
       '<div class="mtot"><span>Total</span><span>' + rp(c.total) + '</span></div>';
     document.getElementById('mErr').style.display = 'none';
@@ -533,7 +679,7 @@ var CONFIG = {
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return show('Email tidak valid.');
     if (wa.length < 9) return show('Nomor WhatsApp tidak valid.');
     go.disabled = true; go.textContent = 'Membuat tagihan...';
-    jsonp({ action: 'checkout', prod: state.key, tg: state.add.tg ? 1 : 0, adm: state.add.adm ? 1 : 0, ga: state.add.ga ? 1 : 0, name: name, email: email, wa: wa }, function (r) {
+    jsonp({ action: 'checkout', prod: state.key, ea: state.key === 'PROMO' ? state.ea : '', tg: state.add.tg ? 1 : 0, adm: state.add.adm ? 1 : 0, ga: state.add.ga ? 1 : 0, name: name, email: email, wa: wa }, function (r) {
       if (r && r.ok && r.link) { go.textContent = 'Membuka pembayaran...'; window.location.href = r.link; return; }
       go.disabled = false; go.textContent = 'Lanjut ke pembayaran';
       show((r && r.error) || 'Gagal membuat tagihan. Hubungi admin lewat WhatsApp.');
@@ -546,8 +692,15 @@ var CONFIG = {
   // ---- event
   var opts = document.getElementById('opts');
   opts.addEventListener('click', function (e) { var top = e.target.closest('.opt-top'); if (top) select(top.parentNode.dataset.k); });
+  opts.addEventListener('click', function (e) {
+    var b = e.target.closest('.eab'); if (!b) return;
+    state.ea = b.dataset.ea;
+    document.querySelectorAll('.eab').forEach(function (x) { var on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    render();
+  });
   opts.addEventListener('change', function (e) { if (e.target.dataset.a) { state.add[e.target.dataset.a] = e.target.checked; render(); } });
   document.getElementById('buy').onclick = checkout;
+  document.getElementById('pbGo').onclick = function () { select('PROMO'); var el = document.querySelector('.opt[data-k="PROMO"]'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); };
   document.getElementById('buy2').onclick = checkout;
   document.querySelectorAll('[data-pick]').forEach(function (a) { a.addEventListener('click', function () { select(a.dataset.pick); }); });
   document.getElementById('yr').textContent = new Date().getFullYear();
@@ -558,7 +711,14 @@ var CONFIG = {
   if (P[h]) select(h);
   // harga resmi dari server (Code.gs)
   jsonp({ action: 'harga' }, function (r) {
-    if (r && r.ok && r.prices) { P = CONFIG.prices = r.prices; A = CONFIG.addons = r.addons || A; build(); }
+    if (r && r.ok && r.prices) {
+      P = CONFIG.prices = r.prices; A = CONFIG.addons = r.addons || A; build();
+      if (h === 'PROMO' && P.PROMO) select('PROMO');
+    }
+    if (r && r.channel) {
+      ['chFoot', 'chLink'].forEach(function (id) { document.getElementById(id).href = r.channel; });
+      document.getElementById('chFoot').hidden = false; document.getElementById('chNote').hidden = false;
+    }
     if (r && r.wa) { CONFIG.waAdmin = r.wa; document.getElementById('waFoot').href = 'https://wa.me/' + r.wa + '?text=' + encodeURIComponent('Halo admin Falcora, saya mau tanya tentang EA Falcora.'); }
   });
 })();
