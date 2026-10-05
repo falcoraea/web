@@ -407,10 +407,12 @@ var CONFIG = {
         <h3>Laporan otomatis</h3>
         <p class="pr">Lewat bot resmi Falcora. Cukup tekan /start lalu isi ID Telegram di formulir.</p>
         <ul>
-          <li><b>&#9989; PROFIT</b><span>Setiap basket profit, lengkap dengan layer, lot, durasi, dan PnL hari ini.</span></li>
-          <li><b>&#10060; LOSS</b><span>Setiap basket loss, supaya kamu tahu saat itu juga.</span></li>
+          <li><b>&#9989; PROFIT</b><span>Setiap posisi selesai profit: terminal, pair, robot (Moving / Eleven), dan PnL hari ini per robot.</span></li>
+          <li><b>&#10060; LOSS</b><span>Setiap posisi selesai loss, supaya kamu tahu saat itu juga.</span></li>
+          <li><b>&#128176; Rupiah</b><span>Semua angka juga dalam Rupiah dengan kurs terbaru, untuk akun dollar maupun cent.</span></li>
+          <li><b>&#128176; /pnl</b><span>Cek PnL per robot kapan saja: pilih pair, lalu hari ini, kemarin, minggu ini, atau bulan ini.</span></li>
           <li><b>&#9940; Berhenti</b><span>EA berhenti karena Daily Target, Equity Quit, Daily Loss, atau Money Management, dan saat jalan lagi.</span></li>
-          <li><b>&#128197; Harian</b><span>Laporan PnL, winrate, basket terbesar, floating terdalam, dan saldo.</span></li>
+          <li><b>&#128197; 3x sehari</b><span>Laporan jam 10:00, 15:00, dan 20:00 WIB: PnL per robot hari ini, minggu ini, bulan ini.</span></li>
           <li><b>&#9203; Lisensi</b><span>Pengingat 3 hari sebelum masa aktif habis.</span></li>
           <li><b>&#128101; 6 ID</b><span>Kirim ke sampai 6 akun Telegram sekaligus, misalnya kamu dan partner.</span></li>
         </ul>
@@ -431,12 +433,12 @@ var CONFIG = {
       </div>
       <div class="chat" aria-hidden="true">
         <div class="bub">
-          <h4>&#9989; PROFIT +2.15 USD</h4>
+          <h4>&#9989; PROFIT +2.15 USD (Rp35.400)</h4>
           <table>
-            <tr><td>Basket</td><td>Moving #2 BUY</td></tr>
-            <tr><td>Layer / lot</td><td>3 layer &bull; 0.03 lot</td></tr>
-            <tr><td>Durasi</td><td>18 menit</td></tr>
-            <tr><td>PnL hari ini</td><td>&#128994; +24.60 USD</td></tr>
+            <tr><td>Terminal</td><td>CORE XAU</td></tr>
+            <tr><td>Robot</td><td>Robot Eleven</td></tr>
+            <tr><td>Robot Moving</td><td>&#128994; +14.20 USD</td></tr>
+            <tr><td>Robot Eleven</td><td>&#128994; +10.40 USD</td></tr>
           </table>
           <div class="ft">CORE XAU &bull; FALCORA CORE &bull; AMAN &bull; XAUUSD</div>
         </div>
@@ -476,7 +478,7 @@ var CONFIG = {
 
 <section style="padding-top:0">
   <div class="wrap">
-    <div class="risk"><b>Peringatan risiko.</b> Trading forex dan emas menggunakan leverage dan berisiko tinggi, termasuk kehilangan seluruh modal. Hasil masa lalu tidak menjamin hasil di masa depan. Falcora adalah alat bantu otomatis. Gunakan dana yang siap kamu tanggung risikonya.</div>
+    <div class="risk"><b>Peringatan risiko.</b> Trading forex dan emas menggunakan leverage dan berisiko tinggi, termasuk kehilangan seluruh modal. Hasil masa lalu tidak menjamin hasil di masa depan. Falcora adalah alat bantu otomatis, bukan jaminan profit. Gunakan dana yang siap kamu tanggung risikonya.</div>
   </div>
 </section>
 
