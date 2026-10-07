@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Falcora Setelan</title>
+<meta name="description" content="Atur EA Falcora tanpa membuka MetaTrader: lot, grid, TP, proteksi, dan pantau saldo, floating, PnL.">
+<meta name="theme-color" content="#070d1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Falcora">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#070d1a;--panel:#0e1830;--panel2:#121f3c;--line:#24365c;--gold:#f0b030;--gold2:#ffd27a;--txt:#e6ebf4;--mut:#8d9cbb;--ok:#26d08c;--err:#f05a66;--field:#0a1328;
+        --font:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--font);font-size:15px;line-height:1.5;
+       background-image:radial-gradient(900px 500px at 85% -10%,rgba(240,176,48,.10),transparent 60%);
+       padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)}
+  button,input,select{font-family:var(--font)}
+  .hide{display:none!important}
+
+  /* ---------- umum ---------- */
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--gold2),#c97f12);display:grid;place-items:center;flex:none}
+  .brand b{font-weight:800;letter-spacing:.16em;font-size:19px;color:var(--gold)}
+  .brand span{display:block;color:var(--mut);font-size:12px;letter-spacing:0;font-weight:500}
+  .link{background:none;border:0;color:var(--gold2);font-weight:600;font-size:13.5px;cursor:pointer;padding:6px 4px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+  h2{font-size:18px;margin:0 0 2px}
+  .muted{color:var(--mut);font-size:13.5px;margin:0}
+  label.f{display:block;font-weight:600;font-size:13px;margin:12px 0 6px;color:#c9d3e6}
+  input,select{width:100%;background:var(--field);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px 12px;font-size:15px;outline:none}
+  input:focus,select:focus{border-color:var(--gold)}
+  input.chg,select.chg{border-color:var(--gold);background:#16203a}
+  .btn{width:100%;border:0;border-radius:11px;padding:13px;font-weight:800;font-size:15px;color:#1a1103;background:linear-gradient(135deg,var(--gold2),var(--gold));cursor:pointer}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line);font-weight:700}
+  .msg{margin-top:12px;font-size:14px;border-radius:10px;padding:11px 13px;display:none}
+  .msg.err{display:block;background:rgba(240,90,102,.1);border:1px solid rgba(240,90,102,.4);color:#ffb3ba}
+  .msg.ok{display:block;background:rgba(38,208,140,.08);border:1px solid rgba(38,208,140,.35);color:#a8f0d2}
+  .hint{color:var(--mut);font-size:12.5px;margin-top:6px}
+  .pill{font-weight:800;font-size:11px;letter-spacing:.03em;padding:4px 9px;border-radius:20px;white-space:nowrap}
+  .pill.ok{background:rgba(38,208,140,.12);color:var(--ok)} .pill.wait{background:rgba(240,176,48,.14);color:var(--gold2)} .pill.no{background:rgba(240,90,102,.12);color:var(--err)}
+  .pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .pos{color:var(--ok)} .neg{color:var(--err)}
+  .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+  .stat span{display:block;color:var(--mut);font-size:11px;font-weight:700;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stat b{display:block;font-size:16px;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* ---------- login ---------- */
+  .login-wrap{min-height:100%;display:grid;place-items:center;padding:24px 16px}
+  .login{width:100%;max-width:420px}
+  .login .brand{margin-bottom:22px}
+  .tabs{display:flex;gap:6px;background:var(--field);border:1px solid var(--line);border-radius:12px;padding:4px;margin:16px 0 4px}
+  .tabs button{flex:1;border:0;background:transparent;color:var(--mut);font-weight:600;font-size:14px;padding:9px 6px;border-radius:9px;cursor:pointer}
+  .tabs button.on{background:var(--panel2);color:var(--txt);box-shadow:inset 0 -2px 0 var(--gold)}
+  .check{display:flex;align-items:center;gap:8px;margin-top:14px;color:#c9d3e6;font-size:13.5px;cursor:pointer}
+  .check input{width:18px;height:18px;accent-color:var(--gold)}
+  .login .btn{margin-top:18px}
+
+  /* ---------- aplikasi ---------- */
+  .app{display:grid;grid-template-columns:minmax(300px,370px) 1fr;height:100vh;height:100dvh}
+  .side{display:flex;flex-direction:column;gap:14px;padding:20px 18px;border-right:1px solid var(--line);background:rgba(10,19,40,.55);overflow:auto}
+  .side-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .who{font-weight:700;font-size:14px}
+  .who small{display:block;color:var(--mut);font-weight:500;font-size:12.5px}
+  .list{display:grid;gap:8px}
+  .ea{display:block;background:var(--field);border:1px solid var(--line);border-radius:12px;padding:11px 12px;cursor:pointer;text-align:left;color:var(--txt);width:100%;font-size:14px}
+  .ea:hover{border-color:#36507f}
+  .ea.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+  .ea .r1{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .ea .t{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ea .s{color:var(--mut);font-size:12px;margin-top:2px}
+  .ea .mini{color:var(--mut);font-size:12px;margin-top:3px;font-variant-numeric:tabular-nums}
+  .empty{color:var(--mut);font-size:14px;padding:18px;text-align:center;border:1px dashed var(--line);border-radius:12px}
+  .side-foot{margin-top:auto;display:grid;gap:8px;padding-bottom:env(safe-area-inset-bottom)}
+  .side-foot .btn{padding:10px;font-size:14px}
+
+  .main{overflow:auto;padding:22px 28px 0;position:relative}
+  .placeholder{height:100%;display:grid;place-items:center;color:var(--mut);text-align:center}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}
+  .back{display:none}
+  .main .stats{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;align-items:start;margin-top:14px}
+  .grp{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .grp h3{font-size:14.5px;margin:0 0 2px;color:var(--gold2)}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 12px}
+  .now{color:var(--mut);font-size:11.5px;margin-top:4px}
+  .preview{margin-top:12px;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;color:#c9d3e6;overflow-wrap:anywhere}
+  .preview b{color:var(--gold2)}
+  .warn{color:#ffcf8a;font-size:12.5px;margin-top:6px}
+  .bar{position:sticky;bottom:0;margin:16px -28px 0;padding:12px 28px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 35%)}
+  .bar .row{display:flex;gap:10px;justify-content:flex-end}
+  .bar .btn{width:auto;min-width:160px}
+  .foot{color:#4f5f80;font-size:12px;text-align:center}
+
+  /* ---------- HP & tablet ---------- */
+  @media (max-width:1023px){
+    .app{display:block;height:auto}
+    .side{border-right:0;background:none;overflow:visible;padding:16px 16px 24px}
+    .main{display:none;overflow:visible;padding:16px 16px 0}
+    body.editing .side{display:none}
+    body.editing .main{display:block}
+    .back{display:inline-block;margin-bottom:8px;padding:6px 0}
+    .topbar{flex-direction:column}
+    .pills{justify-content:flex-start}
+    .main .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .groups{grid-template-columns:1fr}
+    .bar{margin:16px -16px 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+    .bar .btn{flex:1;min-width:0}
+    .placeholder{display:none}
+  }
+  @media (min-width:1024px) and (max-width:1279px){ .main .stats{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  @media (max-width:380px){ .grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="vLogin">
+  <div class="login">
+    <div class="brand">
+      <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c4-1 7-4 9-9 1 4 4 6 9 6-4 2-7 3-9 7-1-3-4-4-9-4z" fill="#1a1103"/></svg></div>
+      <div><b>FALCORA</b><span>Setelan EA</span></div>
+    </div>
+    <div class="card">
+      <h2>Masuk</h2>
+      <p class="muted">Ubah setelan EA dan pantau saldo tanpa membuka MetaTrader.</p>
+      <div class="tabs"><button class="on" data-t="user">Pemilik akun</button><button data-t="admin">Admin</button></div>
+      <div id="fUser">
+        <label class="f" for="iAcc">ID akun MT5</label>
+        <input id="iAcc" inputmode="numeric" autocomplete="username" placeholder="contoh 12345678">
+        <label class="f" for="iPin">PIN</label>
+        <input id="iPin" inputmode="numeric" autocomplete="current-password" maxlength="6" placeholder="6 digit">
+        <p class="hint">PIN muncul di tab <b>Experts</b> MetaTrader dan di menu <b>/status</b> bot Telegram, sekitar 1 menit setelah EA dipasang.</p>
+      </div>
+      <div id="fAdmin" class="hide">
+        <label class="f" for="iPass">Password admin</label>
+        <input id="iPass" type="password" autocomplete="current-password">
+      </div>
+      <label class="check"><input type="checkbox" id="iRemember"> Ingat di perangkat ini</label>
+      <button class="btn" id="bLogin">Masuk</button>
+      <div class="msg" id="mLogin"></div>
+    </div>
+  </div>
+</div>
+
+<!-- APLIKASI -->
+<div class="app hide" id="vApp">
+  <aside class="side">
+    <div class="side-top">
+      <div class="brand">
+        <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c4-1 7-4 9-9 1 4 4 6 9 6-4 2-7 3-9 7-1-3-4-4-9-4z" fill="#1a1103"/></svg></div>
+        <div><b>FALCORA</b><span>Setelan EA</span></div>
+      </div>
+      <button class="link" id="logout">Keluar</button>
+    </div>
+    <div class="who" id="who"></div>
+    <div class="stats" id="sum"></div>
+    <input id="iSearch" class="hide" placeholder="Cari ID akun, pair, terminal..." aria-label="Cari EA">
+    <div class="list" id="list"></div>
+    <div class="side-foot">
+      <button class="btn ghost hide" id="bInstall">Pasang aplikasi di perangkat ini</button>
+      <p class="hint hide" id="iosHint">Pasang di iPhone: tekan tombol <b>Bagikan</b> di Safari, lalu <b>Tambah ke Layar Utama</b>.</p>
+      <p class="foot">Data EA diperbarui tiap &plusmn;1 menit</p>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+    <div class="placeholder" id="ph"><div><h2>Pilih EA</h2><p class="muted">Klik salah satu EA di sebelah kiri untuk melihat dan mengubah setelannya.</p></div></div>
+    <div id="vEdit" class="hide">
+      <button class="link back" id="bBack">&larr; Daftar EA</button>
+      <div class="topbar">
+        <div><h2 id="eTitle"></h2><p class="muted" id="eSub"></p></div>
+        <div class="pills" id="ePills"></div>
+      </div>
+      <div class="stats" id="eStats"></div>
+      <div class="groups" id="groups"></div>
+      <div class="msg" id="mSave"></div>
+      <div class="bar">
+        <div class="row">
+          <button class="btn ghost" id="bReset" disabled>Batal</button>
+          <button class="btn" id="bSave" disabled>Simpan</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// URL Web App Apps Script (sama dengan FLC_LIC_URL di EA)
+var API = 'https://script.google.com/macros/s/AKfycbz2VuCGDEt3IfTCdM5jQOKsJ3lfVoik-qbr9LnM876WGN-g6yaS793TSlDXvCNCmyto/exec';
+
+var G = [
+  { t: 'Umum', f: [
+    { k: 'lot', l: 'Lot awal', s: 0.01, min: 0.01 },
+    { k: 'ct', l: 'Target per siklus ($ per 0.01 lot)', s: 0.5, min: 0, h: 'Dipakai jika TP bertingkat = 0' },
+    { k: 'prof', l: 'Setelan profil', o: [[0, 'AMAN'], [1, 'AGRESIF'], [2, 'LIAR']] },
+    { k: 'mode', l: 'Mode', o: [[0, 'GRID (layer)'], [1, 'TREN (SL + trailing)']] }
+  ]},
+  { t: 'Cara entry', d: 'Mode instan membaca candle yang sedang berjalan (lebih cepat), candle close menunggu candle tutup.', f: [
+    { k: 'em', l: 'Mode entry', o: [[0, 'INSTAN (candle berjalan)'], [1, 'CANDLE CLOSE']] },
+    { k: 'cb', l: 'Konfirmasi (candle)', s: 1, min: 1, max: 10, h: '1 = langsung entry' },
+    { k: 'am', l: 'Filter ADX minimal', s: 1, min: 0, max: 100, h: '0 = off' },
+    { k: 'cs', l: 'Filter jarak dari EMA21 (x ATR)', s: 0.1, min: 0, h: '0 = off' },
+    { k: 'cr', l: 'Tutup basket jika sinyal berbalik', o: [[0, 'Tidak'], [1, 'Ya']] }
+  ]},
+  { t: 'RSI', d: 'Sinyal BUY saat RSI di atas level BUY, SELL saat di bawah level SELL.', f: [
+    { k: 'rp', l: 'Periode RSI', s: 1, min: 2, max: 100 },
+    { k: 'rb', l: 'Level BUY (RSI di atas)', s: 1, min: 0, max: 100 },
+    { k: 'rs', l: 'Level SELL (RSI di bawah)', s: 1, min: 0, max: 100 },
+    { k: 'rsl', l: 'Arah RSI harus searah', o: [[1, 'Ya'], [0, 'Tidak']] }
+  ]},
+  { t: 'Kondisi pasar (otomatis)', d: 'Sideways: grid normal. Tren searah basket: layer dibatasi. Tren melawan basket: tidak tambah layer (dan opsional ditutup).', f: [
+    { k: 'rg', l: 'Saklar otomatis', o: [[1, 'ON'], [0, 'OFF']] },
+    { k: 'rgt', l: 'Tren jika ADX minimal', s: 1, min: 1, max: 100 },
+    { k: 'rgs', l: 'Sideways jika ADX di bawah', s: 1, min: 0, max: 100 },
+    { k: 'rgl', l: 'Tren searah: layer maksimal', s: 1, min: 0, max: 100, h: '0 = tidak dibatasi' },
+    { k: 'rgb', l: 'Tahan basket baru lawan tren', o: [[1, 'Ya'], [0, 'Tidak']] },
+    { k: 'rgc', l: 'Tren melawan: tutup jika rugi ($)', s: 1, min: 0, h: '0 = hanya stop tambah layer' }
+  ]},
+  { t: 'Grid & layer', d: 'Isi 0 untuk mengikuti setelan profil / input EA.', prev: 'lot', f: [
+    { k: 'ul', l: 'Pakai layering', o: [[0, 'Tidak'], [1, 'Ya']] },
+    { k: 'gp', l: 'Jarak grid (poin)', s: 1, min: 0, h: '0 = ikut profil' },
+    { k: 'gl', l: 'Layer maksimal', s: 1, min: 0, max: 100, h: '0 = ikut profil' },
+    { k: 'gm', l: 'Pengali lot', s: 0.1, min: 0, max: 5, h: '1.0 - 5.0, 0 = ikut profil' },
+    { k: 'ga', l: 'Tambah lot per layer', s: 0.01, min: 0, h: 'Contoh 0.1 = 0.1, 0.2, 0.3 ... (menggantikan pengali)' }
+  ]},
+  { t: 'TP bertingkat', d: 'TP = total profit semua layer dalam satu basket. 0 = ikut target profil.', prev: 'tp', f: [
+    { k: 't1l', l: 'TP1 s/d layer', s: 1, min: 1, max: 99 },
+    { k: 't1', l: 'TP1 ($)', s: 1, min: 0 },
+    { k: 't2l', l: 'TP2 s/d layer', s: 1, min: 1, max: 100 },
+    { k: 't2', l: 'TP2 ($)', s: 1, min: 0 },
+    { k: 't3', l: 'TP3 ($), layer berikutnya', s: 1, min: 0 }
+  ]},
+  { t: 'Proteksi', d: 'Isi 0 untuk mematikan.', f: [
+    { k: 'dt', l: 'Daily Target ($)', s: 1, min: 0 },
+    { k: 'dl', l: 'Daily Loss ($)', s: 1, min: 0 },
+    { k: 'eq', l: 'Equity Quit ($ floating)', s: 1, min: 0 },
+    { k: 'ec', l: 'Equity cut per basket ($)', s: 1, min: 0, h: 'Basket ditutup jika floating mencapai -$ ini' },
+    { k: 'cn', l: 'Setelah equity cut', o: [[1, 'Stop sampai besok'], [0, 'Jeda beberapa menit']] },
+    { k: 'cp', l: 'Jeda setelah cut (menit)', s: 1, min: 0 },
+    { k: 'bl', l: 'Batas loss per bot ($)', s: 1, min: 0, only: ['CORE'] },
+    { k: 'bp', l: 'Bot lanjut setelah (menit)', s: 1, min: 0, only: ['CORE'] },
+    { k: 'mm', l: 'Money Management', o: [[0, 'OFF'], [1, 'ON']], only: ['MOVING', 'ELEVEN', 'RSI', 'FOLLOW'] },
+    { k: 'mmf', l: 'MM: floating maksimal ($)', s: 1, min: 0, only: ['MOVING', 'ELEVEN', 'RSI', 'FOLLOW'] },
+    { k: 'mmp', l: 'MM: trading lagi setelah (menit)', s: 1, min: 0, only: ['MOVING', 'ELEVEN', 'RSI', 'FOLLOW'] },
+    { k: 'lg', l: 'Limit gabungan semua chart', o: [[0, 'Tidak'], [1, 'Ya']] }
+  ]},
+  { t: 'Istirahat', f: [
+    { k: 'rc', l: 'Istirahat per siklus (menit)', s: 1, min: 0, h: '0 = tanpa istirahat' }
+  ]},
+  { t: 'Mode Tren', d: 'Hanya dipakai saat Mode = TREN.', f: [
+    { k: 'sl', l: 'Stop loss (x ATR)', s: 0.1, min: 0.1 },
+    { k: 'rr', l: 'Take profit (x SL)', s: 0.1, min: 0, h: '0 = tanpa TP, trailing saja' },
+    { k: 'be', l: 'Impas saat profit (x SL)', s: 0.1, min: 0 },
+    { k: 'tr', l: 'Trailing (x ATR)', s: 0.1, min: 0 },
+    { k: 'ru', l: 'Risiko per posisi ($)', s: 1, min: 0, h: '0 = pakai lot awal' }
+  ]}
+];
+
+var auth = null, data = null, selKey = '', base = {}, timer = null, tab = 'user';
+var PN = { FTBB: 'FT Bollinger', FTBS: 'FT BB + Stoch', RSI: 'Falcora RSI', FOLLOW: 'Falcora Follow' };
+function pn(p) { return PN[p] || p; }
+var REG = { '1': ['TREN NAIK', 'pos'], '-1': ['TREN TURUN', 'neg'], '0': ['SIDEWAYS', ''], '2': ['BELUM JELAS', ''] };
+function regTx(m) { var x = m && REG[String(m.reg)]; return x ? x[0] : '-'; }
+function regCls(m) { var x = m && REG[String(m.reg)]; return x ? x[1] : ''; }
+function fm(v, sign) { var n = Number(v) || 0, s = Math.abs(n).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (n < 0 ? '-' : (sign && n > 0 ? '+' : '')) + s; }
+function pc(v) { return v > 0 ? 'pos' : (v < 0 ? 'neg' : ''); }
+function stat(label, val, cls) { return '<div class="stat"><span>' + label + '</span><b class="' + (cls || '') + '">' + val + '</b></div>'; }
+function agoS(t) { if (!t) return '-'; var s = Math.max(0, Math.round((data.now - t) / 1000)); return s < 90 ? s + ' detik lalu' : Math.round(s / 60) + ' menit lalu'; }
+var $ = function (id) { return document.getElementById(id); };
+var mobile = window.matchMedia('(max-width:1023px)');
+
+function api(name, payload) {
+  var body = JSON.stringify(Object.assign({ api: name }, payload || {}));
+  return fetch(API, { method: 'POST', body: body, redirect: 'follow' })
+    .then(function (r) { if (!r.ok) throw new Error('Server tidak menjawab (' + r.status + ').'); return r.json(); })
+    .then(function (d) { if (!d || d.ok === false) throw new Error(d && d.error ? d.error : 'Gagal.'); return d; })
+    .catch(function (e) { throw (e && e.message) ? e.message : String(e); });
+}
+function msg(el, text, kind) { el.textContent = text || ''; el.className = 'msg' + (text ? ' ' + kind : ''); }
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function num(v) { return Math.round(Number(v) * 10000) / 10000; }
+function ago(t) {
+  if (!t) return 'belum pernah';
+  var m = Math.round((data.now - t) / 60000);
+  return m < 1 ? 'baru saja' : m < 60 ? m + ' menit lalu' : Math.round(m / 60) + ' jam lalu';
+}
+function online(r) { return r.seen && data.now - r.seen < 7 * 60000; }
+function pending(r) { return r.revWeb > r.revEa; }
+function store(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+// ---------- login ----------
+document.querySelectorAll('.tabs button').forEach(function (b) {
+  b.onclick = function () { setTab(b.dataset.t); msg($('mLogin')); };
+});
+function setTab(t) {
+  tab = t;
+  document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x.dataset.t === t); });
+  $('fUser').classList.toggle('hide', t !== 'user');
+  $('fAdmin').classList.toggle('hide', t !== 'admin');
+}
+['iAcc', 'iPin', 'iPass'].forEach(function (id) { $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') login(); }); });
+$('bLogin').onclick = function () { login(); };
+
+function login(saved) {
+  var a = saved || (tab === 'admin' ? { pass: $('iPass').value } : { acc: $('iAcc').value.trim(), pin: $('iPin').value.trim() });
+  $('bLogin').disabled = true; $('bLogin').textContent = 'Memeriksa...'; msg($('mLogin'));
+  api('data', { auth: a }).then(function (d) {
+    auth = a;
+    if (a.acc) store('flcAcc', a.acc);
+    if (!saved) store('flcAuth', $('iRemember').checked ? JSON.stringify(a) : null);
+    $('vLogin').classList.add('hide'); $('vApp').classList.remove('hide');
+    show(d);
+    clearInterval(timer); timer = setInterval(refresh, 20000);
+  }).catch(function (e) {
+    if (saved) store('flcAuth', null);
+    $('vLogin').classList.remove('hide');
+    msg($('mLogin'), e, 'err');
+  }).then(function () { $('bLogin').disabled = false; $('bLogin').textContent = 'Masuk'; });
+}
+$('logout').onclick = function () {
+  if (dirty() && !confirm('Perubahan yang belum disimpan akan hilang. Keluar?')) return;
+  auth = null; data = null; selKey = ''; clearInterval(timer); store('flcAuth', null);
+  $('iPin').value = ''; $('iPass').value = '';
+  document.body.classList.remove('editing');
+  $('vApp').classList.add('hide'); $('vEdit').classList.add('hide'); $('ph').classList.remove('hide'); $('vLogin').classList.remove('hide');
+};
+
+function refresh() {
+  if (!auth || document.hidden) return;
+  api('data', { auth: auth }).then(function (d) {
+    if (dirty()) { data = d; renderList(); renderSum(); var r = find(selKey); if (r) renderStats(r); return; }   // sedang diubah: hanya angka
+    show(d);
+  }).catch(function () {});
+}
+document.addEventListener('visibilitychange', function () { if (!document.hidden) refresh(); });
+
+// ---------- daftar EA ----------
+function show(d) {
+  data = d;
+  $('who').innerHTML = d.admin ? 'Admin<small>' + d.rows.length + ' EA dari semua akun</small>' : 'Akun ' + esc(d.acc) + '<small>' + d.rows.length + ' EA terhubung</small>';
+  $('iSearch').classList.toggle('hide', !d.admin || d.rows.length < 6);
+  renderList();
+  renderSum();
+  if (selKey && find(selKey)) openEa(selKey, true);
+  else if (!selKey && d.rows.length === 1 && !mobile.matches) openEa(d.rows[0].key);
+}
+function find(k) { if (!data) return null; for (var i = 0; i < data.rows.length; i++) if (data.rows[i].key === k) return data.rows[i]; return null; }
+$('iSearch').oninput = renderList;
+
+function renderSum() {
+  var el = $('sum'); if (!data || data.admin) { el.innerHTML = ''; return; }
+  var bal = null, eq = null, flt = 0, pnl = 0, ccy = '', n = 0, bt = 0;
+  data.rows.forEach(function (r) { if (!r.m) return; n++; flt += r.m.flt; pnl += r.m.pnl; if (bal === null || r.m.t > bt) { bal = r.m.bal; eq = r.m.eq; ccy = r.m.ccy; bt = r.m.t; } });
+  if (!n) { el.innerHTML = ''; return; }
+  var c = ccy ? ' <small style="font-size:11px;color:var(--mut)">' + esc(ccy) + '</small>' : '';
+  el.innerHTML = stat('SALDO', fm(bal) + c) + stat('EQUITY', fm(eq) + c) + stat('FLOATING', fm(flt, true), pc(flt)) + stat('PNL HARI INI', fm(pnl, true), pc(pnl));
+}
+
+function renderList() {
+  var q = $('iSearch').value.trim().toLowerCase(), h = '';
+  data.rows.forEach(function (r) {
+    var txt = (r.acc + ' ' + r.sym + ' ' + r.prod + ' ' + pn(r.prod) + ' ' + r.nm).toLowerCase();
+    if (q && txt.indexOf(q) < 0) return;
+    h += '<button class="ea' + (r.key === selKey ? ' on' : '') + '" data-k="' + esc(r.key) + '">' +
+         '<div class="r1"><div class="t">' + esc(r.sym) + ' &middot; ' + esc(pn(r.prod)) + ' #' + r.ch + '</div>' +
+         '<div class="pills">' + (pending(r) ? '<span class="pill wait">MENUNGGU</span>' : '') +
+         (online(r) ? '<span class="pill ok">ONLINE</span>' : '<span class="pill no">OFFLINE</span>') + '</div></div>' +
+         '<div class="s">' + (data.admin ? esc(r.acc) + ' &middot; ' : '') + esc(r.nm || 'tanpa nama') + ' &middot; laporan ' + ago(r.seen) + '</div>' +
+         (r.m ? '<div class="mini">Floating <span class="' + pc(r.m.flt) + '">' + fm(r.m.flt, true) + '</span> &middot; PnL <span class="' + pc(r.m.pnl) + '">' + fm(r.m.pnl, true) +
+                '</span> &middot; <span class="' + regCls(r.m) + '">' + regTx(r.m) + '</span></div>' : '') + '</button>';
+  });
+  $('list').innerHTML = h || '<div class="empty">Belum ada EA yang melapor. Pasang EA versi terbaru lalu tunggu sekitar 1 menit.</div>';
+  $('list').querySelectorAll('.ea').forEach(function (b) {
+    b.onclick = function () {
+      if (b.dataset.k !== selKey && dirty() && !confirm('Perubahan yang belum disimpan akan hilang. Lanjut?')) return;
+      openEa(b.dataset.k);
+    };
+  });
+}
+
+$('bBack').onclick = function () {
+  if (dirty() && !confirm('Perubahan yang belum disimpan akan hilang. Kembali?')) return;
+  document.body.classList.remove('editing');
+  if (dirty()) { var r = find(selKey); if (r) buildForm(r); update(); }
+  window.scrollTo(0, 0);
+};
+
+function renderStats(r) {
+  var m = r && r.m;
+  if (!m) { $('eStats').innerHTML = stat('STATISTIK', 'menunggu laporan EA'); return; }
+  var c = m.ccy ? ' <small style="font-size:11px;color:var(--mut)">' + esc(m.ccy) + '</small>' : '';
+  $('eStats').innerHTML = stat('SALDO', fm(m.bal) + c) + stat('EQUITY', fm(m.eq) + c) + stat('FLOATING', fm(m.flt, true), pc(m.flt)) +
+    stat('PNL HARI INI', fm(m.pnl, true), pc(m.pnl)) + stat('KONDISI PASAR', regTx(m), regCls(m)) + stat('DIPERBARUI', agoS(m.t));
+}
+
+// ---------- form ----------
+function openEa(k, keep) {
+  var r = find(k); if (!r) return;
+  var same = keep && selKey === k && dirty();     // sedang diubah -> jangan bangun ulang form
+  var first = selKey !== k;
+  selKey = k;
+  renderList();
+  base = {};
+  Object.keys(r.ea).forEach(function (x) { base[x] = r.ea[x]; });
+  if (pending(r)) Object.keys(r.web).forEach(function (x) { base[x] = r.web[x]; });
+  $('eTitle').textContent = r.sym + ' · ' + pn(r.prod) + ' #' + r.ch;
+  $('eSub').textContent = (data.admin ? 'Akun ' + r.acc + ' · ' : '') + (r.nm || 'tanpa nama') + ' · laporan terakhir ' + ago(r.seen);
+  $('ePills').innerHTML = (pending(r) ? '<span class="pill wait">MENUNGGU EA MENERAPKAN</span>' : (r.revWeb ? '<span class="pill ok">SUDAH DITERAPKAN</span>' : '')) +
+                          (online(r) ? '' : '<span class="pill no">EA OFFLINE</span>');
+  renderStats(r);
+  if (!same) { buildForm(r); if (first) msg($('mSave')); }
+  $('ph').classList.add('hide');
+  $('vEdit').classList.remove('hide');
+  if (!keep) {
+    document.body.classList.add('editing');
+    if (mobile.matches) window.scrollTo(0, 0); else $('main').scrollTop = 0;
+  }
+  update();
+}
+
+function buildForm(r) {
+  var h = '';
+  G.forEach(function (g) {
+    var fs = g.f.filter(function (f) { return !f.only || f.only.indexOf(r.prod) >= 0; }).filter(function (f) { return f.k in base; });
+    if (!fs.length) return;
+    h += '<section class="grp"><h3>' + g.t + '</h3>' + (g.d ? '<p class="muted">' + g.d + '</p>' : '') + '<div class="grid">';
+    fs.forEach(function (f) {
+      var v = base[f.k];
+      h += '<div><label class="f" for="k_' + f.k + '">' + f.l + '</label>';
+      if (f.o) {
+        h += '<select id="k_' + f.k + '" data-k="' + f.k + '">';
+        f.o.forEach(function (o) { h += '<option value="' + o[0] + '"' + (Number(v) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; });
+        h += '</select>';
+      } else {
+        h += '<input type="number" inputmode="decimal" id="k_' + f.k + '" data-k="' + f.k + '" step="' + f.s + '"' +
+             (f.min !== undefined ? ' min="' + f.min + '"' : '') + (f.max !== undefined ? ' max="' + f.max + '"' : '') + ' value="' + num(v) + '">';
+      }
+      h += '<div class="now">' + (f.h || '') + '</div></div>';
+    });
+    h += '</div>' + (g.prev ? '<div class="preview" id="p_' + g.prev + '"></div>' : '') + '</section>';
+  });
+  $('groups').innerHTML = h;
+  $('groups').querySelectorAll('[data-k]').forEach(function (el) { el.oninput = el.onchange = update; });
+}
+
+function val(k) { var el = $('k_' + k); return el ? Number(el.value) : Number(base[k]); }
+function changes() {
+  var c = {};
+  if (!$('groups')) return c;
+  $('groups').querySelectorAll('[data-k]').forEach(function (el) {
+    var k = el.dataset.k, v = Number(el.value);
+    if (el.value === '' || !isFinite(v)) return;
+    if (Math.abs(v - Number(base[k])) > 1e-9) c[k] = v;
+  });
+  return c;
+}
+function dirty() { return !!selKey && Object.keys(changes()).length > 0; }
+
+function update() {
+  var c = changes(), n = Object.keys(c).length;
+  $('groups').querySelectorAll('[data-k]').forEach(function (el) { el.classList.toggle('chg', el.dataset.k in c); });
+  $('bSave').disabled = n === 0; $('bReset').disabled = n === 0;
+  $('bSave').textContent = n ? 'Simpan ' + n + ' perubahan' : 'Simpan';
+  var p = $('p_lot');
+  if (p) {
+    var lot = val('lot'), gl = val('gl'), gm = val('gm'), ga = val('ga');
+    if (ga > 0 || gm > 0) {
+      var n2 = Math.min(gl > 0 ? gl : 5, 100), list = [], tot = 0;
+      for (var i = 0; i < n2; i++) {
+        var l = ga > 0 ? lot + ga * i : lot * Math.pow(gm, i);
+        l = Math.floor(l * 100 + 1e-6) / 100; tot += l;
+        if (i < 10) list.push(l.toFixed(2));
+      }
+      p.innerHTML = 'Lot per layer: <b>' + list.join(', ') + (n2 > 10 ? ', ...' : '') + '</b><br>Total ' + n2 + ' layer: <b>' + tot.toFixed(2) + ' lot</b>' +
+                    (gl > 0 ? '' : ' (contoh 5 layer, jumlah layer ikut profil)') +
+                    (tot >= lot * 30 ? '<div class="warn">Total lot sangat besar. Pastikan Equity Quit aktif dan modal cukup.</div>' : '');
+    } else p.innerHTML = 'Pola lot ikut setelan profil. Isi <b>Pengali lot</b> atau <b>Tambah lot per layer</b> untuk mengatur sendiri.';
+  }
+  var t = $('p_tp');
+  if (t) {
+    var a = Math.max(1, val('t1l')), b = Math.max(a, val('t2l'));
+    var f = function (v) { return v > 0 ? '$' + num(v) : 'target dasar'; };
+    t.innerHTML = 'TP1 layer <b>1-' + a + '</b>: ' + f(val('t1')) + ' &nbsp;&middot;&nbsp; TP2 layer <b>' + (a + 1) + '-' + b + '</b>: ' + f(val('t2')) +
+                  ' &nbsp;&middot;&nbsp; TP3 layer <b>' + (b + 1) + '+</b>: ' + f(val('t3'));
+  }
+}
+
+$('bReset').onclick = function () { var r = find(selKey); if (r) { buildForm(r); update(); msg($('mSave')); } };
+$('bSave').onclick = function () {
+  var c = changes(); if (!Object.keys(c).length) return;
+  $('bSave').disabled = true; $('bSave').textContent = 'Menyimpan...';
+  api('save', { auth: auth, key: selKey, vals: c }).then(function (d) {
+    data = d; openEa(selKey, true); renderSum();
+    msg($('mSave'), 'Tersimpan. EA akan menerapkan setelan baru dalam ±1 menit (status berubah jadi "Sudah diterapkan").', 'ok');
+  }).catch(function (e) { msg($('mSave'), e, 'err'); update(); });
+};
+window.addEventListener('beforeunload', function (e) { if (dirty()) { e.preventDefault(); e.returnValue = ''; } });
+
+// ---------- PWA ----------
+var deferred = null;
+window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; $('bInstall').classList.remove('hide'); });
+$('bInstall').onclick = function () {
+  if (!deferred) return;
+  deferred.prompt();
+  deferred.userChoice.then(function () { deferred = null; $('bInstall').classList.add('hide'); });
+};
+var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+if (!standalone && /iphone|ipad|ipod/i.test(navigator.userAgent)) $('iosHint').classList.remove('hide');
+if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+
+// ---------- mulai ----------
+var accSaved = load('flcAcc'); if (accSaved) $('iAcc').value = accSaved;
+var authSaved = null; try { authSaved = JSON.parse(load('flcAuth') || 'null'); } catch (e) {}
+if (authSaved && (authSaved.pass || authSaved.acc)) { $('iRemember').checked = true; if (authSaved.pass) setTab('admin'); login(authSaved); }
+</script>
+</body>
+</html>
