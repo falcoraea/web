@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Falcora - Pendaftaran Lisensi</title>
+<meta name="description" content="Pendaftaran dan cek status lisensi EA Falcora.">
+<meta name="theme-color" content="#070d1a">
+<link rel="icon" type="image/png" href="/setelan/icon-192.png">
+<style>
+  html,body{margin:0;height:100%;background:#070d1a}
+  iframe{display:block;border:0;width:100%;height:100vh;height:100dvh}
+  .load{position:fixed;inset:0;display:grid;place-items:center;color:#8d9cbb;font:15px system-ui,sans-serif;pointer-events:none}
+  .load a{color:#f0b030;pointer-events:auto}
+</style>
+</head>
+<body>
+<div class="load" id="load"><div style="text-align:center">Memuat halaman pendaftaran...<br><br><small>Tidak muncul? <a id="alt" href="#" target="_top">Buka di sini</a></small></div></div>
+<iframe id="f" title="Pendaftaran Falcora" allow="clipboard-write"></iframe>
+<script>
+  // URL Web App Apps Script (FORM_URL). Semua parameter (?order=, ?prod=, ?tg=) diteruskan apa adanya.
+  var FORM = 'https://script.google.com/macros/s/AKfycbz2VuCGDEt3IfTCdM5jQOKsJ3lfVoik-qbr9LnM876WGN-g6yaS793TSlDXvCNCmyto/exec';
+  var src = FORM + location.search;
+  document.getElementById('alt').href = src;
+  var f = document.getElementById('f');
+  f.onload = function () { document.getElementById('load').style.display = 'none'; };
+  f.src = src;
+</script>
+</body>
+</html>
