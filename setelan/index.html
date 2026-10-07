@@ -98,6 +98,9 @@
   .preview{margin-top:12px;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;color:#c9d3e6;overflow-wrap:anywhere}
   .preview b{color:var(--gold2)}
   .warn{color:#ffcf8a;font-size:12.5px;margin-top:6px}
+  .why{margin-top:10px;background:rgba(240,176,48,.08);border:1px solid rgba(240,176,48,.35);color:#ffd9a0;border-radius:12px;padding:10px 13px;font-size:13.5px}
+  .why b{color:var(--gold2)}
+  .ea .w{color:#e8b866;font-size:12px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .bar{position:sticky;bottom:0;margin:16px -28px 0;padding:12px 28px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 35%)}
   .bar .row{display:flex;gap:10px;justify-content:flex-end}
   .bar .btn{width:auto;min-width:160px}
@@ -184,6 +187,7 @@
         <div class="pills" id="ePills"></div>
       </div>
       <div class="stats" id="eStats"></div>
+      <div class="why hide" id="eWhy"></div>
       <div class="groups" id="groups"></div>
       <div class="msg" id="mSave"></div>
       <div class="bar">
@@ -203,8 +207,8 @@ var API = 'https://script.google.com/macros/s/AKfycbz2VuCGDEt3IfTCdM5jQOKsJ3lfVo
 var G = [
   { t: 'Umum', f: [
     { k: 'lot', l: 'Lot awal', s: 0.01, min: 0.01 },
-    { k: 'ct', l: 'Target per siklus ($ per 0.01 lot)', s: 0.5, min: 0, h: 'Dipakai jika TP bertingkat = 0' },
-    { k: 'prof', l: 'Setelan profil', o: [[0, 'AMAN'], [1, 'AGRESIF'], [2, 'LIAR']] },
+    { k: 'ct', l: 'Target dasar per siklus ($ per 0.01 lot)', s: 0.5, min: 0, h: 'Dipakai jika TP bertingkat = 0' },
+    { k: 'sd', l: 'Maks basket searah per bot', s: 1, min: 0, max: 50, h: '0 = tidak dibatasi' },
     { k: 'mode', l: 'Mode', o: [[0, 'GRID (layer)'], [1, 'TREN (SL + trailing)']] }
   ]},
   { t: 'Cara entry', d: 'Mode instan membaca candle yang sedang berjalan (lebih cepat), candle close menunggu candle tutup.', f: [
@@ -228,14 +232,14 @@ var G = [
     { k: 'rgb', l: 'Tahan basket baru lawan tren', o: [[1, 'Ya'], [0, 'Tidak']] },
     { k: 'rgc', l: 'Tren melawan: tutup jika rugi ($)', s: 1, min: 0, h: '0 = hanya stop tambah layer' }
   ]},
-  { t: 'Grid & layer', d: 'Isi 0 untuk mengikuti setelan profil / input EA.', prev: 'lot', f: [
+  { t: 'Grid & layer', d: 'Isi 0 untuk memakai setelan bawaan EA.', prev: 'lot', f: [
     { k: 'ul', l: 'Pakai layering', o: [[0, 'Tidak'], [1, 'Ya']] },
-    { k: 'gp', l: 'Jarak grid (poin)', s: 1, min: 0, h: '0 = ikut profil' },
-    { k: 'gl', l: 'Layer maksimal', s: 1, min: 0, max: 100, h: '0 = ikut profil' },
-    { k: 'gm', l: 'Pengali lot', s: 0.1, min: 0, max: 5, h: '1.0 - 5.0, 0 = ikut profil' },
+    { k: 'gp', l: 'Jarak grid (poin)', s: 1, min: 0, h: '0 = bawaan EA' },
+    { k: 'gl', l: 'Layer maksimal', s: 1, min: 0, max: 100, h: '0 = bawaan EA' },
+    { k: 'gm', l: 'Pengali lot', s: 0.1, min: 0, max: 5, h: '1.0 - 5.0, 0 = bawaan EA' },
     { k: 'ga', l: 'Tambah lot per layer', s: 0.01, min: 0, h: 'Contoh 0.1 = 0.1, 0.2, 0.3 ... (menggantikan pengali)' }
   ]},
-  { t: 'TP bertingkat', d: 'TP = total profit semua layer dalam satu basket. 0 = ikut target profil.', prev: 'tp', f: [
+  { t: 'TP bertingkat', d: 'TP = total profit semua layer dalam satu basket. 0 = pakai target dasar.', prev: 'tp', f: [
     { k: 't1l', l: 'TP1 s/d layer', s: 1, min: 1, max: 99 },
     { k: 't1', l: 'TP1 ($)', s: 1, min: 0 },
     { k: 't2l', l: 'TP2 s/d layer', s: 1, min: 1, max: 100 },
@@ -246,6 +250,8 @@ var G = [
     { k: 'dt', l: 'Daily Target ($)', s: 1, min: 0 },
     { k: 'dl', l: 'Daily Loss ($)', s: 1, min: 0 },
     { k: 'eq', l: 'Equity Quit ($ floating)', s: 1, min: 0 },
+    { k: 'bc', l: 'Batas floating per basket ($)', s: 1, min: 0, h: 'Basket ditutup jika floating mencapai -$ ini. 0 = off' },
+    { k: 'bu', l: 'Blokir setelah kena batas (menit)', s: 1, min: 0, h: '0 = sampai besok' },
     { k: 'ec', l: 'Equity cut per basket ($)', s: 1, min: 0, h: 'Basket ditutup jika floating mencapai -$ ini' },
     { k: 'cn', l: 'Setelah equity cut', o: [[1, 'Stop sampai besok'], [0, 'Jeda beberapa menit']] },
     { k: 'cp', l: 'Jeda setelah cut (menit)', s: 1, min: 0 },
@@ -381,7 +387,7 @@ function renderList() {
          (online(r) ? '<span class="pill ok">ONLINE</span>' : '<span class="pill no">OFFLINE</span>') + '</div></div>' +
          '<div class="s">' + (data.admin ? esc(r.acc) + ' &middot; ' : '') + esc(r.nm || 'tanpa nama') + ' &middot; laporan ' + ago(r.seen) + '</div>' +
          (r.m ? '<div class="mini">Floating <span class="' + pc(r.m.flt) + '">' + fm(r.m.flt, true) + '</span> &middot; PnL <span class="' + pc(r.m.pnl) + '">' + fm(r.m.pnl, true) +
-                '</span> &middot; <span class="' + regCls(r.m) + '">' + regTx(r.m) + '</span></div>' : '') + '</button>';
+                '</span> &middot; <span class="' + regCls(r.m) + '">' + regTx(r.m) + '</span></div>' + (r.m.why ? '<div class="w">' + esc(r.m.why) + '</div>' : '') : '') + '</button>';
   });
   $('list').innerHTML = h || '<div class="empty">Belum ada EA yang melapor. Pasang EA versi terbaru lalu tunggu sekitar 1 menit.</div>';
   $('list').querySelectorAll('.ea').forEach(function (b) {
@@ -401,6 +407,8 @@ $('bBack').onclick = function () {
 
 function renderStats(r) {
   var m = r && r.m;
+  $('eWhy').classList.toggle('hide', !(m && m.why));
+  if (m && m.why) $('eWhy').innerHTML = '<b>Belum entry:</b> ' + esc(m.why);
   if (!m) { $('eStats').innerHTML = stat('STATISTIK', 'menunggu laporan EA'); return; }
   var c = m.ccy ? ' <small style="font-size:11px;color:var(--mut)">' + esc(m.ccy) + '</small>' : '';
   $('eStats').innerHTML = stat('SALDO', fm(m.bal) + c) + stat('EQUITY', fm(m.eq) + c) + stat('FLOATING', fm(m.flt, true), pc(m.flt)) +
