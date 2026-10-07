@@ -43,6 +43,8 @@
   .btn{width:100%;border:0;border-radius:11px;padding:13px;font-weight:800;font-size:15px;color:#1a1103;background:linear-gradient(135deg,var(--gold2),var(--gold));cursor:pointer}
   .btn:disabled{opacity:.5;cursor:not-allowed}
   .btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line);font-weight:700}
+  .btn.small{width:auto;padding:7px 12px;font-size:12.5px;border-radius:9px}
+  .btn.danger{border-color:rgba(240,90,102,.5);color:#ffb3ba}
   .msg{margin-top:12px;font-size:14px;border-radius:10px;padding:11px 13px;display:none}
   .msg.err{display:block;background:rgba(240,90,102,.1);border:1px solid rgba(240,90,102,.4);color:#ffb3ba}
   .msg.ok{display:block;background:rgba(38,208,140,.08);border:1px solid rgba(38,208,140,.35);color:#a8f0d2}
@@ -171,6 +173,7 @@
     <div class="stats" id="sum"></div>
     <input id="iSearch" class="hide" placeholder="Cari ID akun, pair, terminal..." aria-label="Cari EA">
     <div class="list" id="list"></div>
+    <button class="link hide" id="bDelAll" style="justify-self:start"></button>
     <div class="side-foot">
       <button class="btn ghost hide" id="bInstall">Pasang aplikasi di perangkat ini</button>
       <p class="hint hide" id="iosHint">Pasang di iPhone: tekan tombol <b>Bagikan</b> di Safari, lalu <b>Tambah ke Layar Utama</b>.</p>
@@ -184,7 +187,7 @@
       <button class="link back" id="bBack">&larr; Daftar EA</button>
       <div class="topbar">
         <div><h2 id="eTitle"></h2><p class="muted" id="eSub"></p></div>
-        <div class="pills" id="ePills"></div>
+        <div class="pills"><span id="ePills" class="pills"></span><button class="btn ghost small danger hide" id="bDel">Hapus dari daftar</button></div>
       </div>
       <div class="stats" id="eStats"></div>
       <div class="why hide" id="eWhy"></div>
@@ -284,7 +287,7 @@ function fm(v, sign) { var n = Number(v) || 0, s = Math.abs(n).toLocaleString('i
   return (n < 0 ? '-' : (sign && n > 0 ? '+' : '')) + s; }
 function pc(v) { return v > 0 ? 'pos' : (v < 0 ? 'neg' : ''); }
 function stat(label, val, cls) { return '<div class="stat"><span>' + label + '</span><b class="' + (cls || '') + '">' + val + '</b></div>'; }
-function agoS(t) { if (!t) return '-'; var s = Math.max(0, Math.round((data.now - t) / 1000)); return s < 90 ? s + ' detik lalu' : Math.round(s / 60) + ' menit lalu'; }
+function agoS(t) { if (!t) return '-'; var s = Math.max(0, Math.round((data.now - t) / 1000)); return s < 90 ? s + ' detik lalu' : (s < 5400 ? Math.round(s / 60) + ' menit lalu' : Math.round(s / 3600) + ' jam lalu'); }
 var $ = function (id) { return document.getElementById(id); };
 var mobile = window.matchMedia('(max-width:1023px)');
 
@@ -303,7 +306,8 @@ function ago(t) {
   var m = Math.round((data.now - t) / 60000);
   return m < 1 ? 'baru saja' : m < 60 ? m + ' menit lalu' : Math.round(m / 60) + ' jam lalu';
 }
-function online(r) { return r.seen && data.now - r.seen < 7 * 60000; }
+function lastSeen(r) { return Math.max(r.seen || 0, (r.m && r.m.t) || 0); }
+function online(r) { var s = lastSeen(r); return s && data.now - s < 7 * 60000; }
 function pending(r) { return r.revWeb > r.revEa; }
 function store(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
 function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -370,7 +374,7 @@ $('iSearch').oninput = renderList;
 function renderSum() {
   var el = $('sum'); if (!data || data.admin) { el.innerHTML = ''; return; }
   var bal = null, eq = null, flt = 0, pnl = 0, ccy = '', n = 0, bt = 0;
-  data.rows.forEach(function (r) { if (!r.m) return; n++; flt += r.m.flt; pnl += r.m.pnl; if (bal === null || r.m.t > bt) { bal = r.m.bal; eq = r.m.eq; ccy = r.m.ccy; bt = r.m.t; } });
+  data.rows.forEach(function (r) { if (!r.m || !online(r)) return; n++; flt += r.m.flt; pnl += r.m.pnl; if (bal === null || r.m.t > bt) { bal = r.m.bal; eq = r.m.eq; ccy = r.m.ccy; bt = r.m.t; } });
   if (!n) { el.innerHTML = ''; return; }
   var c = ccy ? ' <small style="font-size:11px;color:var(--mut)">' + esc(ccy) + '</small>' : '';
   el.innerHTML = stat('SALDO', fm(bal) + c) + stat('EQUITY', fm(eq) + c) + stat('FLOATING', fm(flt, true), pc(flt)) + stat('PNL HARI INI', fm(pnl, true), pc(pnl));
@@ -390,6 +394,9 @@ function renderList() {
                 '</span> &middot; <span class="' + regCls(r.m) + '">' + regTx(r.m) + '</span></div>' + (r.m.why ? '<div class="w">' + esc(r.m.why) + '</div>' : '') : '') + '</button>';
   });
   $('list').innerHTML = h || '<div class="empty">Belum ada EA yang melapor. Pasang EA versi terbaru lalu tunggu sekitar 1 menit.</div>';
+  var off = data.rows.filter(function (r) { return !online(r); });
+  $('bDelAll').classList.toggle('hide', off.length === 0);
+  $('bDelAll').textContent = 'Hapus ' + off.length + ' EA offline dari daftar';
   $('list').querySelectorAll('.ea').forEach(function (b) {
     b.onclick = function () {
       if (b.dataset.k !== selKey && dirty() && !confirm('Perubahan yang belum disimpan akan hilang. Lanjut?')) return;
@@ -429,6 +436,7 @@ function openEa(k, keep) {
   $('eSub').textContent = (data.admin ? 'Akun ' + r.acc + ' · ' : '') + (r.nm || 'tanpa nama') + ' · laporan terakhir ' + ago(r.seen);
   $('ePills').innerHTML = (pending(r) ? '<span class="pill wait">MENUNGGU EA MENERAPKAN</span>' : (r.revWeb ? '<span class="pill ok">SUDAH DITERAPKAN</span>' : '')) +
                           (online(r) ? '' : '<span class="pill no">EA OFFLINE</span>');
+  $('bDel').classList.toggle('hide', online(r));
   renderStats(r);
   if (!same) { buildForm(r); if (first) msg($('mSave')); }
   $('ph').classList.add('hide');
@@ -517,6 +525,21 @@ $('bSave').onclick = function () {
   }).catch(function (e) { msg($('mSave'), e, 'err'); update(); });
 };
 window.addEventListener('beforeunload', function (e) { if (dirty()) { e.preventDefault(); e.returnValue = ''; } });
+
+// ---------- hapus EA offline ----------
+function delEa(keys, text) {
+  if (!keys.length || !confirm(text + '\n\nEA akan muncul lagi otomatis begitu online. Setelan yang belum diterapkan ikut terhapus.')) return;
+  api('del', { auth: auth, keys: keys }).then(function (d) {
+    if (selKey && keys.indexOf(selKey) >= 0) { selKey = ''; $('vEdit').classList.add('hide'); $('ph').classList.remove('hide'); document.body.classList.remove('editing'); }
+    show(d);
+    if (d.skipped) alert(d.skipped + ' EA tidak dihapus karena ternyata masih online.');
+  }).catch(function (e) { alert(e); });
+}
+$('bDel').onclick = function () { var r = find(selKey); if (r) delEa([r.key], 'Hapus ' + r.sym + ' ' + pn(r.prod) + ' #' + r.ch + ' dari daftar?'); };
+$('bDelAll').onclick = function () {
+  var off = data.rows.filter(function (r) { return !online(r); });
+  delEa(off.map(function (r) { return r.key; }), 'Hapus ' + off.length + ' EA offline dari daftar?');
+};
 
 // ---------- PWA ----------
 var deferred = null;
