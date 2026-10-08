@@ -233,7 +233,17 @@ var G = [
     { k: 'rgs', l: 'Sideways jika ADX di bawah', s: 1, min: 0, max: 100 },
     { k: 'rgl', l: 'Tren searah: layer maksimal', s: 1, min: 0, max: 100, h: '0 = tidak dibatasi' },
     { k: 'rgb', l: 'Tahan basket baru lawan tren', o: [[1, 'Ya'], [0, 'Tidak']] },
-    { k: 'rgc', l: 'Tren melawan: tutup jika rugi ($)', s: 1, min: 0, h: '0 = hanya stop tambah layer' }
+    { k: 'rgc', l: 'Tren melawan: tutup jika rugi ($)', s: 1, min: 0, h: '0 = hanya stop tambah layer' },
+    { k: 'rtf', l: 'Timeframe pembaca pasar', o: [[5, 'M5 (lebih cepat)'], [15, 'M15'], [30, 'M30'], [60, 'H1 (lebih tenang)']] }
+  ]},
+  { t: 'Pelindung lonjakan', d: 'Saat harga lari cepat, EA berhenti menambah layer dan membuka basket yang melawan arah lonjakan, sampai harga tenang lagi.', f: [
+    { k: 'sp', l: 'Pelindung lonjakan', o: [[1, 'ON'], [0, 'OFF']] },
+    { k: 'spb', l: 'Diukur dalam (candle M1)', s: 1, min: 2, max: 30 },
+    { k: 'spa', l: 'Lonjakan jika gerak minimal (x rata-rata candle M1)', s: 0.5, min: 0.5, max: 50, h: 'Makin kecil makin sensitif' },
+    { k: 'spp', l: 'Atau gerak minimal (poin)', s: 1, min: 0, h: '0 = pakai pengali rata-rata candle di atas' },
+    { k: 'spc', l: 'Tenang setelah (candle M1 tanpa puncak baru)', s: 1, min: 1, max: 60 },
+    { k: 'lgm', l: 'Jeda minimal antar layer (menit)', s: 1, min: 0, max: 1440, h: '0 = off' },
+    { k: 'dg', l: 'Jarak grid melebar saat liar, maksimal (x)', s: 0.5, min: 1, max: 10, h: '1 = off. Contoh 2.5: jarak grid bisa sampai 2,5x saat pasar liar' }
   ]},
   { t: 'Grid & layer', d: 'Isi 0 untuk memakai setelan bawaan EA.', prev: 'lot', f: [
     { k: 'ul', l: 'Pakai layering', o: [[0, 'Tidak'], [1, 'Ya']] },
@@ -520,7 +530,8 @@ $('bSave').onclick = function () {
   var c = changes(); if (!Object.keys(c).length) return;
   $('bSave').disabled = true; $('bSave').textContent = 'Menyimpan...';
   api('save', { auth: auth, key: selKey, vals: c }).then(function (d) {
-    data = d; openEa(selKey, true); renderSum();
+    data = d; var k = selKey; selKey = '';
+    openEa(k, true); selKey = k; buildForm(find(k)); update(); renderList();
     msg($('mSave'), 'Tersimpan. EA akan menerapkan setelan baru dalam ±1 menit (status berubah jadi "Sudah diterapkan").', 'ok');
   }).catch(function (e) { msg($('mSave'), e, 'err'); update(); });
 };
