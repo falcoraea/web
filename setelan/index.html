@@ -187,7 +187,7 @@
       <button class="link back" id="bBack">&larr; Daftar EA</button>
       <div class="topbar">
         <div><h2 id="eTitle"></h2><p class="muted" id="eSub"></p></div>
-        <div class="pills"><span id="ePills" class="pills"></span><button class="btn ghost small danger hide" id="bDel">Hapus dari daftar</button></div>
+        <div class="pills"><span id="ePills" class="pills"></span><button class="btn small hide" id="bRst" title="Lepas Equity Quit / STOP dan trading lagi sekarang">&#9654; Restart</button><button class="btn ghost small danger hide" id="bDel">Hapus dari daftar</button></div>
       </div>
       <div class="stats" id="eStats"></div>
       <div class="why hide" id="eWhy"></div>
@@ -447,6 +447,7 @@ function openEa(k, keep) {
   $('ePills').innerHTML = (pending(r) ? '<span class="pill wait">MENUNGGU EA MENERAPKAN</span>' : (r.revWeb ? '<span class="pill ok">SUDAH DITERAPKAN</span>' : '')) +
                           (online(r) ? '' : '<span class="pill no">EA OFFLINE</span>');
   $('bDel').classList.toggle('hide', online(r));
+  $('bRst').classList.toggle('hide', !(online(r) && ('rst' in r.ea)));
   renderStats(r);
   if (!same) { buildForm(r); if (first) msg($('mSave')); }
   $('ph').classList.add('hide');
@@ -536,6 +537,19 @@ $('bSave').onclick = function () {
   }).catch(function (e) { msg($('mSave'), e, 'err'); update(); });
 };
 window.addEventListener('beforeunload', function (e) { if (dirty()) { e.preventDefault(); e.returnValue = ''; } });
+
+// ---------- restart (lepas Equity Quit / STOP) ----------
+$('bRst').onclick = function () {
+  var r = find(selKey); if (!r) return;
+  if (dirty()) { alert('Simpan atau batalkan perubahan setelan dulu.'); return; }
+  if (!confirm('Restart ' + r.sym + ' ' + pn(r.prod) + ' #' + r.ch + '?\n\nSemua status STOP (Equity Quit, Daily Target/Loss, Money Management, blokir basket) dilepas dan EA langsung trading lagi. Daily Target / Daily Loss dihitung dari nol sejak restart.')) return;
+  var b = $('bRst'); b.disabled = true;
+  api('save', { auth: auth, key: selKey, vals: { rst: Math.floor(Date.now() / 1000) } }).then(function (d) {
+    data = d; var k = selKey; selKey = '';
+    openEa(k, true); selKey = k; buildForm(find(k)); update(); renderList();
+    msg($('mSave'), 'Restart dikirim. EA lanjut trading dalam ±1 menit (status berubah jadi "Sudah diterapkan").', 'ok');
+  }).catch(function (e) { msg($('mSave'), e, 'err'); }).then(function () { b.disabled = false; });
+};
 
 // ---------- hapus EA offline ----------
 function delEa(keys, text) {

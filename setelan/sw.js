@@ -1,5 +1,5 @@
 // Falcora Setelan: simpan tampilan aplikasi supaya cepat dibuka. Data EA selalu diambil langsung dari server.
-const CACHE = 'flc-setelan-v4';
+const CACHE = 'flc-setelan-v5';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
