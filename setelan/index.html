@@ -128,6 +128,19 @@
   }
   @media (min-width:1024px) and (max-width:1279px){ .main .stats{grid-template-columns:repeat(3,minmax(0,1fr))} }
   @media (max-width:380px){ .grid{grid-template-columns:1fr} }
+  .modal{position:fixed;inset:0;background:rgba(3,7,15,.72);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+  .modal.on{display:flex}
+  .sheet{width:100%;max-width:720px;max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+  .seg2{display:flex;gap:6px;margin:12px 0}
+  .seg2 button{border:1px solid var(--line);background:var(--field);color:var(--mut);border-radius:9px;padding:6px 12px;font-weight:700;font-size:13px;cursor:pointer}
+  .seg2 button.on{color:var(--txt);border-color:var(--gold)}
+  .adu{background:var(--field);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;font-size:14px}
+  .adu .h{display:flex;justify-content:space-between;gap:8px;color:var(--mut);font-size:12.5px;flex-wrap:wrap}
+  .adu .p{margin:6px 0 10px;white-space:pre-wrap}
+  .adu .r{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start}
+  .adu textarea{flex:1;min-width:220px;min-height:60px;background:var(--bg);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:9px 11px;font-family:var(--font);font-size:14px}
+  .adu select{width:auto}
+  .badge-n{display:inline-block;min-width:20px;padding:1px 7px;border-radius:20px;background:var(--err);color:#fff;font-size:12px;margin-left:6px}
 </style>
 </head>
 <body>
@@ -168,6 +181,7 @@
     <input id="iSearch" class="hide" placeholder="Cari ID akun, pair, terminal..." aria-label="Cari EA">
     <div class="list" id="list"></div>
     <button class="link hide" id="bDelAll" style="justify-self:start"></button>
+    <button class="btn ghost" id="bAdu">Aduan &amp; usulan fitur</button>
     <div class="side-foot">
       <button class="btn ghost hide" id="bInstall">Pasang aplikasi di perangkat ini</button>
       <p class="hint hide" id="iosHint">Pasang di iPhone: tekan tombol <b>Bagikan</b> di Safari, lalu <b>Tambah ke Layar Utama</b>.</p>
@@ -200,6 +214,13 @@
   </main>
 </div>
 
+<div class="modal" id="mAdu" role="dialog" aria-modal="true" aria-labelledby="aduT">
+  <div class="sheet">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 id="aduT">Aduan &amp; usulan fitur</h2><button class="link" id="aduX">Tutup</button></div>
+    <div class="seg2" id="aduF"><button data-f="open" class="on">Belum selesai</button><button data-f="all">Semua</button></div>
+    <div id="aduL"></div>
+  </div>
+</div>
 <script>
 // URL Web App Apps Script (sama dengan FLC_LIC_URL di EA)
 var API = 'https://script.google.com/macros/s/AKfycbz2VuCGDEt3IfTCdM5jQOKsJ3lfVoik-qbr9LnM876WGN-g6yaS793TSlDXvCNCmyto/exec';
@@ -208,6 +229,8 @@ var G = [
   { t: 'Umum', f: [
     { k: 'off', l: 'EA', o: [[0, 'ON (trading)'], [1, 'OFF (tidak buka posisi baru)']], h: 'OFF dari web: posisi yang terbuka tetap dikelola sampai TP / cut' },
     { k: 'lot', l: 'Lot awal', s: 0.01, min: 0.01 },
+    { k: 'jk1', l: 'Jam kerja mulai (WIB, JJMM)', s: 1, min: 0, max: 2359, h: '800 = 08:00. Mulai = selesai -> 24 jam' },
+    { k: 'jk2', l: 'Jam kerja selesai (WIB, JJMM)', s: 1, min: 0, max: 2359, h: '1900 = 19:00. Di luar jam kerja tidak buka posisi baru' },
     { k: 'ct', l: 'Target dasar per siklus ($ per 0.01 lot)', s: 0.5, min: 0, h: 'Dipakai jika TP bertingkat = 0' },
     { k: 'sd', l: 'Maks basket searah per bot', s: 1, min: 0, max: 50, h: '0 = tidak dibatasi' },
     { k: 'mode', l: 'Mode', o: [[0, 'GRID (layer)'], [1, 'TREN (SL + trailing)']] }
@@ -361,7 +384,9 @@ $('logout').onclick = function () {
   $('vApp').classList.add('hide'); $('vEdit').classList.add('hide'); $('ph').classList.remove('hide'); $('vLogin').classList.remove('hide');
 };
 
-var busy = false;
+var busy = false, skew = 0;
+setInterval(function () { document.querySelectorAll('.ago').forEach(function (x) { x.textContent = agoS2(Number(x.dataset.t)); }); }, 1000);
+function agoS2(t) { if (!t) return '-'; var s = Math.max(0, Math.round((Date.now() + skew - t) / 1000)); return s < 90 ? s + ' detik lalu' : (s < 5400 ? Math.round(s / 60) + ' menit lalu' : Math.round(s / 3600) + ' jam lalu'); }
 function refresh() {
   if (!auth || document.hidden || busy) return;
   if (!selKey && Date.now() - lastFull < 15000) return;
@@ -375,7 +400,7 @@ document.addEventListener('visibilitychange', function () { if (!document.hidden
 
 // ---------- daftar EA ----------
 function show(d) {
-  data = d;
+  data = d; skew = d.now - Date.now(); aduBadge(d.aduanOpen || 0);
   $('who').innerHTML = d.admin ? 'Admin<small>' + d.rows.length + ' EA dari semua akun</small>' : 'Akun ' + esc(d.acc) + '<small>' + d.rows.length + ' EA terhubung</small>';
   $('iSearch').classList.toggle('hide', !d.admin || d.rows.length < 6);
   renderList();
@@ -445,7 +470,7 @@ function renderStats(r) {
   if (!m) { $('eStats').innerHTML = stat('STATISTIK', 'menunggu laporan EA'); return; }
   var c = m.ccy ? ' <small style="font-size:11px;color:var(--mut)">' + esc(m.ccy) + '</small>' : '';
   $('eStats').innerHTML = stat('SALDO', fm(m.bal) + c) + stat('EQUITY', fm(m.eq) + c) + stat('FLOATING', fm(m.flt, true), pc(m.flt)) +
-    stat('PNL HARI INI', fm(m.pnl, true), pc(m.pnl)) + stat('KONDISI PASAR', regTx(m), regCls(m)) + stat('DIPERBARUI', agoS(m.t));
+    stat('PNL HARI INI', fm(m.pnl, true), pc(m.pnl)) + stat('KONDISI PASAR', regTx(m), regCls(m)) + '<div class="stat"><span>DIPERBARUI</span><b class="ago" data-t="' + m.t + '">' + agoS(m.t) + '</b></div>';
 }
 
 // ---------- form ----------
@@ -566,6 +591,35 @@ $('bRst').onclick = function () {
     msg($('mSave'), 'Restart dikirim. EA lanjut trading dalam beberapa detik (status berubah jadi "Sudah diterapkan").', 'ok');
   }).catch(function (e) { msg($('mSave'), e, 'err'); }).then(function () { b.disabled = false; });
 };
+
+// ---------- aduan & usulan fitur (admin) ----------
+var aduList = [], aduFilter = 'open';
+function aduBadge(n) { $('bAdu').innerHTML = 'Aduan &amp; usulan fitur' + (n ? '<span class="badge-n">' + n + '</span>' : ''); }
+function aduRender() {
+  var l = aduList.filter(function (x) { return aduFilter === 'all' || ['SELESAI', 'DITOLAK'].indexOf(x.s) < 0; });
+  $('aduL').innerHTML = l.map(function (x) {
+    var t = x.t ? new Date(x.t).toLocaleString('id-ID', { day: '2-digit', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+    return '<div class="adu" data-id="' + esc(x.id) + '"><div class="h"><span><b style="color:var(--gold2)">' + esc(x.j) + '</b> · akun ' + esc(x.acc) + ' · ' + esc(t) + '</span><span>' + esc(x.id) + '</span></div>' +
+      '<div class="p">' + esc(x.p) + '</div><div class="r"><textarea placeholder="Balasan untuk pelanggan (dikirim ke Telegram notifikasi)">' + esc(x.b) + '</textarea>' +
+      '<div style="display:grid;gap:8px"><select>' + ['BARU', 'DIPROSES', 'SELESAI', 'DITOLAK'].map(function (s) { return '<option' + (s === x.s ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select>' +
+      '<button class="btn small">Simpan</button></div></div></div>';
+  }).join('') || '<p class="muted" style="margin-top:12px">Tidak ada pesan.</p>';
+  $('aduL').querySelectorAll('.adu').forEach(function (el) {
+    el.querySelector('button').onclick = function () {
+      var b = this; b.disabled = true;
+      api('aduanSet', { auth: auth, id: el.dataset.id, status: el.querySelector('select').value, balasan: el.querySelector('textarea').value })
+        .then(function (d) { aduList = d.list; aduBadge(d.open); aduRender(); }).catch(function (e) { alert(e); b.disabled = false; });
+    };
+  });
+}
+$('bAdu').onclick = function () {
+  $('mAdu').classList.add('on'); $('aduL').innerHTML = '<p class="muted" style="margin-top:12px">Memuat...</p>';
+  api('aduanList', { auth: auth }).then(function (d) { aduList = d.list; aduBadge(d.open); aduRender(); }).catch(function (e) { $('aduL').textContent = e; });
+};
+$('aduX').onclick = function () { $('mAdu').classList.remove('on'); };
+$('mAdu').addEventListener('click', function (e) { if (e.target === $('mAdu')) $('mAdu').classList.remove('on'); });
+document.querySelectorAll('#aduF button').forEach(function (b) { b.onclick = function () {
+  aduFilter = b.dataset.f; document.querySelectorAll('#aduF button').forEach(function (x) { x.classList.toggle('on', x === b); }); aduRender(); }; });
 
 // ---------- ubah saldo pelanggan (admin) ----------
 $('bSaldo').onclick = function () {
