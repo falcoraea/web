@@ -654,6 +654,7 @@ var CONFIG = {
   var EA_NAME = { ALL: 'semua EA Falcora (Moving, Eleven, dan Core)', CORE: 'Falcora Core', MOVING: 'Falcora Moving', ELEVEN: 'Falcora Eleven' };
   function keys() { return KEYS.concat(P.PROMO ? ['PROMO'] : []); }
   var EA_SHORT = { MOVING: 'Moving', ELEVEN: 'Eleven', CORE: 'Core' };
+  var _pea = 1;
   function promoEas() { return (P.PROMO && P.PROMO.eas && P.PROMO.eas.length) ? P.PROMO.eas : ['MOVING', 'ELEVEN', 'CORE']; }
   function eaList() { return promoEas().map(function (e) { return EA_SHORT[e]; }).join(', ').replace(/, ([^,]*)$/, ', atau $1'); }
   function addonsOf(k) { return k === 'PROMO' ? ['tg', 'adm', 'web'] : ['tg', 'adm', 'web', 'ga']; }
@@ -671,7 +672,7 @@ var CONFIG = {
     };
     var bar = document.getElementById('promoBar');
     bar.hidden = false;
-    document.getElementById('pbName').textContent = '\ud83d\udd25 ' + q.name + ' ' + rp(q.price) + (q.normal ? ' (normal ' + rp(q.normal) + ')' : '');
+    document.getElementById('pbName').textContent = '\ud83d\udd25 ' + q.name + ' \u00b7 ' + (one ? 'Falcora ' + EA_SHORT[promoEas()[0]] : 'Falcora ' + promoEas().map(function (e) { return EA_SHORT[e]; }).join(' / ')) + ' ' + rp(q.price) + (q.normal ? ' (normal ' + rp(q.normal) + ')' : '');
     document.getElementById('pbText').textContent = n + ' akun MT5 dengan ' + ea + ', saldo awal ' + rp(Math.round(q.price / n)) + ' per akun.';
     document.getElementById('pbSlot').textContent = q.sisa > 0 ? 'Sisa ' + q.sisa + ' dari ' + q.slot + ' slot' : 'Slot habis';
     document.getElementById('pbGo').disabled = q.sisa <= 0;
@@ -690,7 +691,7 @@ var CONFIG = {
       html += '<div class="opt' + (k === 'PROMO' ? ' promo' : '') + (soldOut(k) ? ' soldout' : '') + '" data-k="' + k + '">' +
         '<button class="opt-top" role="radio" aria-checked="false" type="button">' +
           '<span class="radio" aria-hidden="true"></span>' +
-          '<span><span class="nm">' + p.name + (d.badge ? '<span class="badge' + (d.hot ? ' hot' : '') + '">' + d.badge + '</span>' : '') + '</span><span class="per">' + d.period + '</span></span>' +
+          '<span><span class="nm">' + (k === 'PROMO' ? p.name + ' \u00b7 <span class="pea">Falcora ' + EA_SHORT[state.ea] + '</span>' : p.name) + (d.badge ? '<span class="badge' + (d.hot ? ' hot' : '') + '">' + d.badge + '</span>' : '') + '</span><span class="per">' + d.period + '</span></span>' +
           '<span class="price num">' + (p.normal ? '<s>' + rp(p.normal) + '</s>' : '') + '<b>' + rp(p.price) + '</b>' + (o ? '<span class="off">Hemat ' + o + '%</span>' : '') + '</span>' +
         '</button>' +
         '<div class="opt-body"><div><div class="opt-inner">' +
@@ -808,6 +809,7 @@ var CONFIG = {
     var b = e.target.closest('.eab'); if (!b) return;
     state.ea = b.dataset.ea;
     document.querySelectorAll('.eab').forEach(function (x) { var on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    document.querySelectorAll('.pea').forEach(function (x) { x.textContent = 'Falcora ' + EA_SHORT[state.ea]; });
     render();
   });
   opts.addEventListener('change', function (e) { if (e.target.dataset.a) { state.add[e.target.dataset.a] = e.target.checked; render(); } });
