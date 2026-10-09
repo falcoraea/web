@@ -509,7 +509,7 @@ function renderEas(rows) {
     var keep = !fresh && dirty(el), st = eaState(r), offNow = val(r, 'off') > 0.5;
     var head = '<div class="ea-h"><div><div class="t">' + esc(r.sym) + ' &middot; ' + esc(PN[r.prod] || r.prod) + ' #' + r.ch + '</div><div class="s">' + esc(r.nm || 'tanpa nama') + '</div></div>' +
       '<div class="pills">' + (pending(r) ? '<span class="pill wait">MENUNGGU EA</span>' : '') + (online(r) ? '<span class="pill ok">ONLINE</span>' : '<span class="pill no">OFFLINE</span>') + '</div></div>' +
-      (r.m ? '<div class="stats">' + stat('FLOATING', fm(r.m.flt, true), pc(r.m.flt)) + stat('PNL HARI INI', fm(r.m.pnl, true), pc(r.m.pnl)) +
+      (r.m ? '<div class="stats">' + stat('FLOATING', fm(r.m.flt, true), pc(r.m.flt)) + (function () { var q = pnlOf('') ? (pnl.key && pnl.key[r.key]) || { pl: 0 } : null; return stat('PNL ' + periodRange()[2].toUpperCase(), q ? fm(q.pl, true) : '-', q ? pc(q.pl) : ''); })() +
              stat('POSISI', r.m.pos === null || r.m.pos === undefined ? '-' : r.m.pos) + '<div class="stat"><span>DIPERBARUI</span><b class="ago" data-t="' + r.m.t + '">' + agoTxt(r.m.t) + '</b></div></div>' : '') +
       (st ? '<div class="state ' + st[0] + '">' + esc(st[1]) + '</div>' : '');
     if (keep) { el.querySelector('.live').innerHTML = head; return; }
