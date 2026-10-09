@@ -100,6 +100,8 @@
   .preview{margin-top:12px;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;color:#c9d3e6;overflow-wrap:anywhere}
   .preview b{color:var(--gold2)}
   .warn{color:#ffcf8a;font-size:12.5px;margin-top:6px}
+  .saldo{margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 13px;font-size:13.5px}
+  .saldo .srow{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap} .saldo .srow input{flex:1;min-width:140px}
   .why{margin-top:10px;background:rgba(240,176,48,.08);border:1px solid rgba(240,176,48,.35);color:#ffd9a0;border-radius:12px;padding:10px 13px;font-size:13.5px}
   .why b{color:var(--gold2)}
   .ea .w{color:#e8b866;font-size:12px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -139,16 +141,8 @@
     </div>
     <div class="card">
       <h2>Masuk</h2>
-      <p class="muted">Ubah setelan EA dan pantau saldo tanpa membuka MetaTrader.</p>
-      <div class="tabs"><button class="on" data-t="user">Pemilik akun</button><button data-t="admin">Admin</button></div>
-      <div id="fUser">
-        <label class="f" for="iAcc">ID akun MT5</label>
-        <input id="iAcc" inputmode="numeric" autocomplete="username" placeholder="contoh 12345678">
-        <label class="f" for="iPin">PIN</label>
-        <input id="iPin" inputmode="numeric" autocomplete="current-password" maxlength="6" placeholder="6 digit">
-        <p class="hint">PIN muncul di tab <b>Experts</b> MetaTrader dan di menu <b>/status</b> bot Telegram, sekitar 1 menit setelah EA dipasang.</p>
-      </div>
-      <div id="fAdmin" class="hide">
+      <p class="muted">Halaman khusus admin. Pelanggan login di halaman <b>Akun</b>.</p>
+      <div id="fAdmin">
         <label class="f" for="iPass">Password admin</label>
         <input id="iPass" type="password" autocomplete="current-password">
       </div>
@@ -177,7 +171,7 @@
     <div class="side-foot">
       <button class="btn ghost hide" id="bInstall">Pasang aplikasi di perangkat ini</button>
       <p class="hint hide" id="iosHint">Pasang di iPhone: tekan tombol <b>Bagikan</b> di Safari, lalu <b>Tambah ke Layar Utama</b>.</p>
-      <p class="foot">Data EA diperbarui tiap &plusmn;1 menit</p>
+      <p class="foot">EA yang sedang dibuka diperbarui tiap &plusmn;2&ndash;3 detik</p>
     </div>
   </aside>
 
@@ -191,6 +185,9 @@
       </div>
       <div class="stats" id="eStats"></div>
       <div class="why hide" id="eWhy"></div>
+      <div class="saldo hide" id="eSaldo"><div id="eSaldoTx"></div>
+        <div class="srow"><input id="sAmt" type="number" inputmode="numeric" placeholder="Jumlah, contoh 100000 atau -30000"><input id="sNote" placeholder="Catatan (opsional)"><button class="btn small" id="bSaldo">Ubah saldo</button></div>
+      </div>
       <div class="groups" id="groups"></div>
       <div class="msg" id="mSave"></div>
       <div class="bar">
@@ -209,6 +206,7 @@ var API = 'https://script.google.com/macros/s/AKfycbz2VuCGDEt3IfTCdM5jQOKsJ3lfVo
 
 var G = [
   { t: 'Umum', f: [
+    { k: 'off', l: 'EA', o: [[0, 'ON (trading)'], [1, 'OFF (tidak buka posisi baru)']], h: 'OFF dari web: posisi yang terbuka tetap dikelola sampai TP / cut' },
     { k: 'lot', l: 'Lot awal', s: 0.01, min: 0.01 },
     { k: 'ct', l: 'Target dasar per siklus ($ per 0.01 lot)', s: 0.5, min: 0, h: 'Dipakai jika TP bertingkat = 0' },
     { k: 'sd', l: 'Maks basket searah per bot', s: 1, min: 0, max: 50, h: '0 = tidak dibatasi' },
@@ -234,7 +232,12 @@ var G = [
     { k: 'rgl', l: 'Tren searah: layer maksimal', s: 1, min: 0, max: 100, h: '0 = tidak dibatasi' },
     { k: 'rgb', l: 'Tahan basket baru lawan tren', o: [[1, 'Ya'], [0, 'Tidak']] },
     { k: 'rgc', l: 'Tren melawan: tutup jika rugi ($)', s: 1, min: 0, h: '0 = hanya stop tambah layer' },
-    { k: 'rtf', l: 'Timeframe pembaca pasar', o: [[5, 'M5 (lebih cepat)'], [15, 'M15'], [30, 'M30'], [60, 'H1 (lebih tenang)']] }
+    { k: 'rtf', l: 'Timeframe pembaca pasar', o: [[5, 'M5 (lebih cepat)'], [15, 'M15'], [30, 'M30'], [60, 'H1 (lebih tenang)']] },
+    { k: 'rgu', l: 'Saat BELUM JELAS', o: [[1, 'Batasi layer yang melawan arah'], [2, 'Tahan semua yang melawan arah'], [0, 'Normal (seperti sideways)']], h: 'Arah = DI jika ADX kuat, selain itu EMA20/50. Jika ADX kuat dan DI melawan basket, layer selalu ditahan.' },
+    { k: 'rgn', l: 'Belum jelas: layer maksimal yang melawan arah', s: 1, min: 0, max: 100, h: 'Untuk mode Batasi. 0 = tidak dibatasi' }
+  ]},
+  { t: 'Perekam data', d: 'EA mencatat saldo, equity, floating, basket, dan setelan tiap menit ke file CSV di folder Common\\Files MT5 untuk dianalisis.', f: [
+    { k: 'rec', l: 'Rekam data tiap menit', o: [[1, 'ON'], [0, 'OFF']] }
   ]},
   { t: 'Pelindung lonjakan', d: 'Saat harga lari cepat, EA berhenti menambah layer dan membuka basket yang melawan arah lonjakan, sampai harga tenang lagi.', f: [
     { k: 'sp', l: 'Pelindung lonjakan', o: [[1, 'ON'], [0, 'OFF']] },
@@ -287,7 +290,7 @@ var G = [
   ]}
 ];
 
-var auth = null, data = null, selKey = '', base = {}, timer = null, tab = 'user';
+var auth = null, data = null, selKey = '', base = {}, timer = null, tab = 'admin', lastFull = 0;
 var PN = { FTBB: 'FT Bollinger', FTBS: 'FT BB + Stoch', RSI: 'Falcora RSI', FOLLOW: 'Falcora Follow' };
 function pn(p) { return PN[p] || p; }
 var REG = { '1': ['TREN NAIK', 'pos'], '-1': ['TREN TURUN', 'neg'], '0': ['SIDEWAYS', ''], '2': ['BELUM JELAS', ''] };
@@ -305,7 +308,7 @@ function api(name, payload) {
   var body = JSON.stringify(Object.assign({ api: name }, payload || {}));
   return fetch(API, { method: 'POST', body: body, redirect: 'follow' })
     .then(function (r) { if (!r.ok) throw new Error('Server tidak menjawab (' + r.status + ').'); return r.json(); })
-    .then(function (d) { if (!d || d.ok === false) throw new Error(d && d.error ? d.error : 'Gagal.'); return d; })
+    .then(function (d) { if (!d || d.ok === false) { if (d && d.code === 'SESI' && name !== 'login' && auth) setTimeout(sessionGone, 0); throw new Error(d && d.error ? d.error : 'Gagal.'); } return d; })
     .catch(function (e) { throw (e && e.message) ? e.message : String(e); });
 }
 function msg(el, text, kind) { el.textContent = text || ''; el.className = 'msg' + (text ? ' ' + kind : ''); }
@@ -322,49 +325,51 @@ function pending(r) { return r.revWeb > r.revEa; }
 function store(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
 function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 
-// ---------- login ----------
-document.querySelectorAll('.tabs button').forEach(function (b) {
-  b.onclick = function () { setTab(b.dataset.t); msg($('mLogin')); };
-});
-function setTab(t) {
-  tab = t;
-  document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x.dataset.t === t); });
-  $('fUser').classList.toggle('hide', t !== 'user');
-  $('fAdmin').classList.toggle('hide', t !== 'admin');
-}
-['iAcc', 'iPin', 'iPass'].forEach(function (id) { $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') login(); }); });
+// ---------- login (admin, sesi token) ----------
+$('iPass').addEventListener('keydown', function (e) { if (e.key === 'Enter') login(); });
 $('bLogin').onclick = function () { login(); };
-
-function login(saved) {
-  var a = saved || (tab === 'admin' ? { pass: $('iPass').value } : { acc: $('iAcc').value.trim(), pin: $('iPin').value.trim() });
+function startApp(d) {
+  $('vLogin').classList.add('hide'); $('vApp').classList.remove('hide');
+  show(d); lastFull = Date.now();
+  clearInterval(timer); timer = setInterval(refresh, 2500);
+}
+function login(tok) {
   $('bLogin').disabled = true; $('bLogin').textContent = 'Memeriksa...'; msg($('mLogin'));
-  api('data', { auth: a }).then(function (d) {
-    auth = a;
-    if (a.acc) store('flcAcc', a.acc);
-    if (!saved) store('flcAuth', $('iRemember').checked ? JSON.stringify(a) : null);
-    $('vLogin').classList.add('hide'); $('vApp').classList.remove('hide');
-    show(d);
-    clearInterval(timer); timer = setInterval(refresh, 20000);
-  }).catch(function (e) {
-    if (saved) store('flcAuth', null);
+  var p = tok ? Promise.resolve({ tok: tok }) : api('login', { pass: $('iPass').value });
+  p.then(function (r) {
+    auth = { tok: r.tok };
+    store('flcTok', tok || $('iRemember').checked ? r.tok : null);
+    return api('data', { auth: auth });
+  }).then(startApp).catch(function (e) {
+    auth = null; store('flcTok', null);
     $('vLogin').classList.remove('hide');
-    msg($('mLogin'), e, 'err');
-  }).then(function () { $('bLogin').disabled = false; $('bLogin').textContent = 'Masuk'; });
+    if (!tok) msg($('mLogin'), e, 'err');
+  }).then(function () { $('bLogin').disabled = false; $('bLogin').textContent = 'Masuk'; $('iPass').value = ''; });
+}
+function sessionGone() {
+  clearInterval(timer); auth = null; data = null; selKey = ''; store('flcTok', null);
+  document.body.classList.remove('editing');
+  $('vApp').classList.add('hide'); $('vEdit').classList.add('hide'); $('ph').classList.remove('hide'); $('vLogin').classList.remove('hide');
+  msg($('mLogin'), 'Sesi login habis, silakan masuk lagi.', 'err');
 }
 $('logout').onclick = function () {
   if (dirty() && !confirm('Perubahan yang belum disimpan akan hilang. Keluar?')) return;
-  auth = null; data = null; selKey = ''; clearInterval(timer); store('flcAuth', null);
-  $('iPin').value = ''; $('iPass').value = '';
+  if (auth) api('logout', { auth: auth }).catch(function () {});
+  auth = null; data = null; selKey = ''; clearInterval(timer); store('flcTok', null);
+  $('iPass').value = '';
   document.body.classList.remove('editing');
   $('vApp').classList.add('hide'); $('vEdit').classList.add('hide'); $('ph').classList.remove('hide'); $('vLogin').classList.remove('hide');
 };
 
+var busy = false;
 function refresh() {
-  if (!auth || document.hidden) return;
-  api('data', { auth: auth }).then(function (d) {
+  if (!auth || document.hidden || busy) return;
+  if (!selKey && Date.now() - lastFull < 15000) return;
+  busy = true; lastFull = Date.now();
+  api('data', { auth: auth, sel: selKey }).then(function (d) {
     if (dirty()) { data = d; renderList(); renderSum(); var r = find(selKey); if (r) renderStats(r); return; }   // sedang diubah: hanya angka
     show(d);
-  }).catch(function () {});
+  }).catch(function (e) { if (/Sesi login habis/.test(e)) sessionGone(); }).then(function () { busy = false; });
 }
 document.addEventListener('visibilitychange', function () { if (!document.hidden) refresh(); });
 
@@ -399,7 +404,7 @@ function renderList() {
          '<div class="r1"><div class="t">' + esc(r.sym) + ' &middot; ' + esc(pn(r.prod)) + ' #' + r.ch + '</div>' +
          '<div class="pills">' + (pending(r) ? '<span class="pill wait">MENUNGGU</span>' : '') +
          (online(r) ? '<span class="pill ok">ONLINE</span>' : '<span class="pill no">OFFLINE</span>') + '</div></div>' +
-         '<div class="s">' + (data.admin ? esc(r.acc) + ' &middot; ' : '') + esc(r.nm || 'tanpa nama') + ' &middot; laporan ' + ago(r.seen) + '</div>' +
+         '<div class="s">' + (data.admin ? esc(r.acc) + ' &middot; ' : '') + esc(r.nm || 'tanpa nama') + ' &middot; laporan ' + ago(r.seen) + saldoTag(r.acc) + '</div>' +
          (r.m ? '<div class="mini">Floating <span class="' + pc(r.m.flt) + '">' + fm(r.m.flt, true) + '</span> &middot; PnL <span class="' + pc(r.m.pnl) + '">' + fm(r.m.pnl, true) +
                 '</span> &middot; <span class="' + regCls(r.m) + '">' + regTx(r.m) + '</span></div>' + (r.m.why ? '<div class="w">' + esc(r.m.why) + '</div>' : '') : '') + '</button>';
   });
@@ -422,7 +427,18 @@ $('bBack').onclick = function () {
   window.scrollTo(0, 0);
 };
 
+function rpx(n) { return 'Rp' + Math.round(Number(n) || 0).toLocaleString('id-ID'); }
+function saldoOf(acc) { return data && data.saldo ? data.saldo[acc] : null; }
+function saldoTag(acc) { var s = saldoOf(acc); return s ? ' &middot; <span class="' + (s.s < (data.tarif || 0) ? 'neg' : '') + '">saldo ' + rpx(s.s) + '</span>' : ''; }
+function renderSaldo(r) {
+  var s = saldoOf(r.acc), el = $('eSaldo');
+  if (!s) { el.classList.add('hide'); return; }
+  el.classList.remove('hide');
+  $('eSaldoTx').innerHTML = '<b>Saldo pelanggan ' + esc(r.acc) + ': <span class="' + (s.s < (data.tarif || 0) ? 'neg' : 'pos') + '">' + rpx(s.s) + '</span></b> &middot; ' +
+    (data.tarif ? '&plusmn;' + Math.floor(s.s / data.tarif) + ' hari (' + rpx(data.tarif) + '/hari)' : '') + (s.d ? ' &middot; hari ini sudah dipotong' : '');
+}
 function renderStats(r) {
+  renderSaldo(r);
   var m = r && r.m;
   $('eWhy').classList.toggle('hide', !(m && m.why));
   if (m && m.why) $('eWhy').innerHTML = '<b>Belum entry:</b> ' + esc(m.why);
@@ -533,7 +549,7 @@ $('bSave').onclick = function () {
   api('save', { auth: auth, key: selKey, vals: c }).then(function (d) {
     data = d; var k = selKey; selKey = '';
     openEa(k, true); selKey = k; buildForm(find(k)); update(); renderList();
-    msg($('mSave'), 'Tersimpan. EA akan menerapkan setelan baru dalam ±1 menit (status berubah jadi "Sudah diterapkan").', 'ok');
+    msg($('mSave'), 'Tersimpan. EA akan menerapkan setelan baru dalam beberapa detik (status berubah jadi "Sudah diterapkan").', 'ok');
   }).catch(function (e) { msg($('mSave'), e, 'err'); update(); });
 };
 window.addEventListener('beforeunload', function (e) { if (dirty()) { e.preventDefault(); e.returnValue = ''; } });
@@ -547,8 +563,19 @@ $('bRst').onclick = function () {
   api('save', { auth: auth, key: selKey, vals: { rst: Math.floor(Date.now() / 1000) } }).then(function (d) {
     data = d; var k = selKey; selKey = '';
     openEa(k, true); selKey = k; buildForm(find(k)); update(); renderList();
-    msg($('mSave'), 'Restart dikirim. EA lanjut trading dalam ±1 menit (status berubah jadi "Sudah diterapkan").', 'ok');
+    msg($('mSave'), 'Restart dikirim. EA lanjut trading dalam beberapa detik (status berubah jadi "Sudah diterapkan").', 'ok');
   }).catch(function (e) { msg($('mSave'), e, 'err'); }).then(function () { b.disabled = false; });
+};
+
+// ---------- ubah saldo pelanggan (admin) ----------
+$('bSaldo').onclick = function () {
+  var r = find(selKey); if (!r) return;
+  var n = Math.round(Number($('sAmt').value)); if (!n) { alert('Isi jumlah (pakai minus untuk mengurangi).'); return; }
+  if (!confirm((n > 0 ? 'Tambah ' : 'Kurangi ') + rpx(Math.abs(n)) + ' saldo akun ' + r.acc + '?')) return;
+  $('bSaldo').disabled = true;
+  api('saldo', { auth: auth, acc: r.acc, amount: n, note: $('sNote').value }).then(function (d) {
+    data = d; $('sAmt').value = ''; $('sNote').value = ''; renderList(); renderSaldo(r);
+  }).catch(function (e) { alert(e); }).then(function () { $('bSaldo').disabled = false; });
 };
 
 // ---------- hapus EA offline ----------
@@ -579,9 +606,9 @@ if (!standalone && /iphone|ipad|ipod/i.test(navigator.userAgent)) $('iosHint').c
 if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
 
 // ---------- mulai ----------
-var accSaved = load('flcAcc'); if (accSaved) $('iAcc').value = accSaved;
-var authSaved = null; try { authSaved = JSON.parse(load('flcAuth') || 'null'); } catch (e) {}
-if (authSaved && (authSaved.pass || authSaved.acc)) { $('iRemember').checked = true; if (authSaved.pass) setTab('admin'); login(authSaved); }
+store('flcAuth', null);                                    // versi lama menyimpan password: hapus
+var tokSaved = load('flcTok');
+if (tokSaved) { $('iRemember').checked = true; login(tokSaved); }
 </script>
 </body>
 </html>
