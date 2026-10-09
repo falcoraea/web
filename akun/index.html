@@ -100,6 +100,13 @@
   .range{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
   .range input{width:auto;flex:1;min-width:140px;padding:8px 10px;font-size:14px}
   .stack{display:grid;gap:16px;padding-bottom:16px}
+  #dashBox{margin-bottom:16px}
+  .dashf{border:1px solid rgba(80,150,255,.55);background:linear-gradient(180deg,rgba(60,120,240,.10),rgba(60,120,240,.02)) ,var(--panel);box-shadow:inset 3px 0 0 #4f8cff}
+  .dashf h2{color:#a9c8ff}
+  .detf{border:1px solid rgba(240,176,48,.6);box-shadow:inset 3px 0 0 var(--gold)}
+  .divider{display:flex;align-items:center;gap:12px;margin:2px 0 16px;color:var(--gold2);font-size:11.5px;font-weight:800;letter-spacing:.12em}
+  .divider::before,.divider::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);border-radius:2px}
+  .divider.hide{display:none}
   .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
   .nm{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .nm h2{font-size:19px}
@@ -230,9 +237,8 @@
   </aside>
 
   <main class="main" id="main">
-    <!-- dashboard total -->
-    <div id="vDash" class="stack">
-      <section class="card" id="dashBox">
+    <!-- dashboard total: selalu tampil di atas -->
+      <section class="card dashf" id="dashBox">
         <div class="sec-h">
           <h2>Dashboard total <span class="muted" id="dSub" style="font-weight:500"></span></h2>
           <div class="seg" id="seg">
@@ -243,6 +249,8 @@
         <div class="stats" id="dash"></div>
         <p class="hint" id="dHint" style="margin-top:10px">Pilih EA di daftar untuk melihat detail dan mengatur setelannya. Data diperbarui otomatis tiap &plusmn;2&ndash;3 detik.</p>
       </section>
+    <div class="divider hide" id="dDiv"><span>AKUN TRADING YANG DIBUKA</span></div>
+    <div id="vDash" class="stack">
       <section class="card" id="aduBox">
         <h2>Aduan &amp; usulan fitur</h2>
         <p class="muted" style="margin-top:2px">Ada kendala, pertanyaan, atau ide fitur? Kirim di sini. Balasan admin muncul di bawah dan dikirim ke Telegram notifikasi kamu.</p>
@@ -260,7 +268,7 @@
 
     <!-- detail EA -->
     <div id="vDet" class="stack hide">
-      <div>
+      <div class="card detf">
         <button class="link back" id="bBack">&larr; Kembali</button>
         <div class="topbar">
           <div>
@@ -525,14 +533,14 @@ function openEa(k) {
   if (sel && sel !== k && dirty() && !confirm('Perubahan yang belum disimpan akan hilang. Pindah EA?')) return;
   var first = sel !== k;
   sel = k; document.body.classList.add('det');
-  $('vDash').classList.add('hide'); $('vDet').classList.remove('hide');
+  $('vDash').classList.add('hide'); $('vDet').classList.remove('hide'); $('dDiv').classList.remove('hide');
   render(); renderDet(first);
   if (first) { msg($('mSave')); $('dNameEdit').classList.add('hide'); $('dNameBox').classList.remove('hide'); }
-  if (mobile.matches) window.scrollTo(0, 0); else $('main').scrollTop = 0;
+  if (first) { var y = $('dDiv'); if (mobile.matches) window.scrollTo(0, Math.max(0, y.getBoundingClientRect().top + window.scrollY - 70)); else $('main').scrollTop = Math.max(0, y.offsetTop - 10); }
 }
 function closeEa() {
   sel = ''; document.body.classList.remove('det');
-  $('vDet').classList.add('hide'); $('vDash').classList.remove('hide');
+  $('vDet').classList.add('hide'); $('dDiv').classList.add('hide'); $('vDash').classList.remove('hide');
   if (data) render();
 }
 $('bBack').onclick = function () { if (dirty() && !confirm('Perubahan yang belum disimpan akan hilang. Kembali?')) return; closeEa(); };
