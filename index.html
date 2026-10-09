@@ -28,7 +28,8 @@ var CONFIG = {
   prices: {
     MOVING: { name: 'Falcora Moving', price: 290000, normal: 590000, months: 6 },
     ELEVEN: { name: 'Falcora Eleven', price: 290000, normal: 590000, months: 6 },
-    CORE:   { name: 'Falcora Core',   price: 490000, normal: 990000, months: 6 }
+    CORE:   { name: 'Falcora Core',   price: 490000, normal: 990000, months: 6 },
+    PROMO:  { name: 'Falcora Promo',  price: 550000, normal: 1470000, months: 6, accounts: 3, eas: ['MOVING', 'ELEVEN', 'CORE'], slot: 5, sisa: 5 }
   },
   addons: {
     tg:  { name: 'Bot notifikasi Telegram', price: 49000, normal: 99000 },
@@ -338,7 +339,7 @@ var CONFIG = {
   <div class="wrap">
     <div>
       <h1>EA khusus XAUUSD yang mengikuti arah pasar, bukan melawannya.</h1>
-      <p class="lead">Emas sering bergerak liar dan tidak wajar. Falcora membaca apakah pasar sedang <b>sideways</b>, <b>tren naik</b>, atau <b>tren turun</b>, lalu menyesuaikan cara kerjanya sendiri: grid berjalan normal saat sideways, layer dibatasi atau dihentikan saat tren, dan basket yang melawan tren bisa langsung dipotong. Kendali tetap di tanganmu: jalan atau berhenti, lot, jam kerja, dan batas rugi, dari web maupun Telegram.</p>
+      <p class="lead">Emas sering bergerak liar dan tidak wajar. Falcora membaca apakah pasar sedang <b>sideways</b>, <b>tren naik</b>, atau <b>tren turun</b>, lalu menyesuaikan cara kerjanya sendiri. Kendali tetap di tanganmu: jalan atau berhenti, lot, jam kerja, dan batas rugi, dari web maupun Telegram.</p>
       <div class="hero-cta">
         <a class="btn btn-gold" href="#produk">Lihat harga</a>
         <a class="btn btn-ghost" href="#cara-kerja">Cara kerjanya</a>
@@ -352,7 +353,7 @@ var CONFIG = {
 
     <div class="mt5" aria-label="Contoh tampilan panel Falcora di MetaTrader 5">
       <div class="hd"><div><b>FALCORA</b><small>CORE &nbsp;/&nbsp; GRID &nbsp;/&nbsp; XAUUSD</small></div><span class="dot"></span></div>
-      <div class="st"><div><span>Status</span><b>RUNNING</b></div><span>3 posisi<br><small style="color:var(--profit)">TREN NAIK (ADX 31)</small></span></div>
+      <div class="st"><div><span>Status</span><b>RUNNING</b></div><span>3 posisi<br><small style="color:var(--profit)">TREN NAIK</small></span></div>
       <dl class="num">
         <div><dt>PnL hari ini</dt><dd class="pos" id="demoPnl">+24.60</dd></div>
         <div><dt>Floating</dt><dd class="neg" id="demoFlt">-3.15</dd></div>
@@ -430,17 +431,12 @@ var CONFIG = {
   <div class="wrap">
     <div class="sec-head">
       <h2>Membaca pasar dulu, baru bertindak</h2>
-      <p class="sub">XAUUSD bisa diam berjam-jam lalu lari puluhan dolar dalam hitungan menit. Falcora memeriksa kondisi pasar terus-menerus (ADX, arah DI, dan EMA 20/50) dan mengubah cara kerjanya sesuai kondisi itu.</p>
+      <p class="sub">XAUUSD bisa diam berjam-jam lalu lari puluhan dolar dalam hitungan menit. Falcora memeriksa kondisi pasar terus-menerus dan mengubah cara kerjanya sesuai kondisi itu.</p>
     </div>
     <div class="modes">
-      <div class="md"><span class="ic">&#8596;</span><h3>Sideways</h3><p>Harga bolak-balik dalam rentang. Grid berjalan normal: layer ditambah sesuai jarak, lalu basket ditutup bersama di target profit.</p></div>
+      <div class="md"><span class="ic">&#8596;</span><h3>Sideways</h3><p>Harga bolak-balik dalam rentang. EA bekerja normal mengikuti pergerakan bolak-balik itu.</p></div>
       <div class="md up"><span class="ic">&#8599;</span><h3>Tren naik</h3><p>Basket BUY yang searah tren tetap jalan dengan layer dibatasi. Basket SELL yang melawan tren tidak ditambah layer, dan basket SELL baru ditahan.</p></div>
       <div class="md dn"><span class="ic">&#8600;</span><h3>Tren turun</h3><p>Kebalikannya: SELL boleh dengan layer terbatas, BUY tidak ditambah layer. Jika tren melawan terkonfirmasi dan rugi basket mencapai batas yang kamu atur, basket langsung dipotong.</p></div>
-    </div>
-    <div class="extra">
-      <div><b>Pelindung lonjakan</b><span>Harga lari jauh dalam beberapa menit? Layer dan entry yang melawan arah lonjakan ditahan sampai harga tenang lagi.</span></div>
-      <div><b>Jarak grid ikut volatilitas</b><span>Saat pasar liar, jarak antar layer otomatis melebar supaya layer tidak menumpuk.</span></div>
-      <div><b>Jeda antar layer</b><span>Layer tidak bisa ditambah beruntun dalam hitungan detik, ada jeda minimal yang bisa diatur.</span></div>
     </div>
   </div>
 </section>
@@ -478,7 +474,7 @@ var CONFIG = {
       <ul class="webl">
         <li><b>Dashboard semua akun</b><span>Saldo, equity, floating, PnL, win rate, dan jumlah posisi dari semua akun MT5 sekaligus, diperbarui tiap beberapa detik.</span></li>
         <li><b>PnL per periode</b><span>Hari ini, kemarin, minggu ini, bulan ini, atau rentang tanggal pilihanmu.</span></li>
-        <li><b>Atur EA dari HP</b><span>Lot, grid dan layer, jam kerja, Equity Quit, Daily Target, Daily Loss, dan batas per basket.</span></li>
+        <li><b>Atur EA dari HP</b><span>Lot, jam kerja, Equity Quit, Daily Target, Daily Loss, dan batas per basket.</span></li>
         <li><b>Jalan, berhenti, restart</b><span>Satu tombol untuk mematikan, menyalakan, atau melanjutkan EA setelah berhenti.</span></li>
         <li><b>Saldo &amp; top up</b><span>Lihat sisa saldo, riwayat pemakaian harian, dan top up langsung.</span></li>
         <li><b>Aduan &amp; usulan fitur</b><span>Kirim kendala atau ide fitur, balasan admin muncul di halaman yang sama.</span></li>
@@ -583,8 +579,7 @@ var CONFIG = {
     <div class="sec-head"><h2>Tanya jawab</h2></div>
     <div class="faq">
       <details><summary>Broker apa yang bisa dipakai?</summary><p>Broker apa saja yang menyediakan MetaTrader 5 dengan akun tipe <b>hedging</b> (posisi BUY dan SELL bisa terbuka bersamaan) dan symbol emas XAUUSD, misalnya Exness, XM, FBS, Octa, HFM, IC Markets, Tickmill, Vantage, Pepperstone, dan FXTM. Akun cent juga bisa (misalnya XAUUSDc).</p></details>
-      <details><summary>Kenapa hanya XAUUSD?</summary><p>Seluruh setelan Falcora (jarak grid, target, pembaca kondisi pasar, dan pelindung lonjakan) dirancang dan diuji khusus untuk karakter emas yang volatil. Pasang di chart XAUUSD saja.</p></details>
-      <details><summary>Bagaimana EA tahu pasar sedang tren atau sideways?</summary><p>EA membaca ADX (kekuatan gerak), arah DI, dan posisi EMA 20/50 di timeframe yang bisa kamu pilih (M5, M15, M30, H1). Jika ADX rendah, pasar dianggap sideways dan grid berjalan normal. Jika ADX kuat dan arah DI serta EMA sepakat, pasar dianggap tren: layer searah dibatasi, layer yang melawan dihentikan, dan basket melawan tren bisa dipotong di batas rugi yang kamu atur.</p></details>
+      <details><summary>Kenapa hanya XAUUSD?</summary><p>Falcora dirancang khusus untuk karakter emas yang volatil. Pasang di chart XAUUSD saja.</p></details>
       <details><summary>Satu pembelian untuk berapa akun?</summary><p>Satu pembelian untuk satu ID akun MT5, dan saldonya milik akun itu. Jika ingin bisa pindah ke akun lain, tambahkan <b>Bisa ganti akun</b> saat membeli: lisensi, saldo, dan password web ikut pindah. Selama promo masih ada slot, paket <b>Falcora Promo</b> berlaku untuk beberapa akun sekaligus.</p></details>
       <details><summary>Apakah ada grup untuk pembeli?</summary><p>Ada. Setelah pembayaran berhasil, link grup Telegram pembeli Falcora muncul di halaman pendaftaran dan dikirim ke email. Di grup ada info update EA, setelan, dan tanya jawab.</p></details>
       <details><summary>Apa bedanya web akun, bot notifikasi, dan bot setting?</summary><p><b>Web akun</b> adalah halaman pribadimu di browser atau HP: dashboard, PnL per periode, ubah lot dan proteksi, jam kerja, ON/OFF, restart, saldo, top up, dan aduan. <b>Bot notifikasi</b> mengirim laporan ke Telegram lewat bot Falcora (sampai 6 ID). <b>Bot setting</b> memakai bot pribadimu sendiri dengan menu kendali: ON/OFF Algo Trading, PANIC, status, laporan, posisi, dan ganti lot.</p></details>
@@ -638,8 +633,8 @@ var CONFIG = {
   var DESC = {
     MOVING: {
       badge: '', period: 'Harga = saldo awal, 1 akun',
-      text: 'Entry selektif: posisi dibuka hanya saat beberapa pertimbangan sepakat ke arah yang sama. Saat sideways grid berjalan normal, saat tren searah layer dibatasi, dan saat tren melawan EA berhenti menambah layer.',
-      list: ['Entry lebih sedikit, tapi lebih terpilih', 'Membaca sideways, tren naik, dan tren turun secara otomatis', 'Tidak membuka basket baru yang melawan tren', 'Pelindung lonjakan: layer ditahan saat harga lari cepat'],
+      text: 'Entry selektif: posisi dibuka hanya saat beberapa pertimbangan sepakat ke arah yang sama. Cara kerjanya menyesuaikan sendiri saat pasar sideways, tren naik, atau tren turun.',
+      list: ['Entry lebih sedikit, tapi lebih terpilih', 'Membaca sideways, tren naik, dan tren turun secara otomatis', 'Tidak membuka basket baru yang melawan tren', 'Jalan, berhenti, lot, dan batas rugi kamu atur dari web dan Telegram'],
       spec: SPEC
     },
     ELEVEN: {
