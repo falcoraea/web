@@ -1,7 +1,7 @@
 {
   "name": "Falcora Akun",
   "short_name": "Falcora",
-  "description": "Saldo, top up, dan kontrol EA Falcora dari HP.",
+  "description": "Dashboard PnL, saldo, dan kendali EA Falcora XAUUSD dari HP.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
