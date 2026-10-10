@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Falcora Setelan</title>
-<meta name="description" content="Atur EA Falcora tanpa membuka MetaTrader: lot, grid, TP, proteksi, dan pantau saldo, floating, PnL.">
+<meta name="description" content="Halaman admin Falcora.">
+<meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#070d1a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -185,7 +186,7 @@
     <div class="side-foot">
       <button class="btn ghost hide" id="bInstall">Pasang aplikasi di perangkat ini</button>
       <p class="hint hide" id="iosHint">Pasang di iPhone: tekan tombol <b>Bagikan</b> di Safari, lalu <b>Tambah ke Layar Utama</b>.</p>
-      <p class="foot">EA yang sedang dibuka diperbarui tiap &plusmn;2&ndash;3 detik</p>
+      <p class="foot">Halaman diperbarui tiap detik &middot; EA yang dibuka melapor tiap &plusmn;2 detik</p>
     </div>
   </aside>
 
@@ -225,94 +226,9 @@
 // URL Web App Apps Script (sama dengan FLC_LIC_URL di EA)
 var API = 'https://script.google.com/macros/s/AKfycbz2VuCGDEt3IfTCdM5jQOKsJ3lfVoik-qbr9LnM876WGN-g6yaS793TSlDXvCNCmyto/exec';
 
-var G = [
-  { t: 'Umum', f: [
-    { k: 'off', l: 'EA', o: [[0, 'ON (trading)'], [1, 'OFF (tidak buka posisi baru)']], h: 'OFF dari web: posisi yang terbuka tetap dikelola sampai TP / cut' },
-    { k: 'lot', l: 'Lot awal', s: 0.01, min: 0.01 },
-    { k: 'jk1', l: 'Jam kerja mulai (WIB, JJMM)', s: 1, min: 0, max: 2359, h: '800 = 08:00. Mulai = selesai -> 24 jam' },
-    { k: 'jk2', l: 'Jam kerja selesai (WIB, JJMM)', s: 1, min: 0, max: 2359, h: '1900 = 19:00. Di luar jam kerja tidak buka posisi baru' },
-    { k: 'ct', l: 'Target dasar per siklus ($ per 0.01 lot)', s: 0.5, min: 0, h: 'Dipakai jika TP bertingkat = 0' },
-    { k: 'sd', l: 'Maks basket searah per bot', s: 1, min: 0, max: 50, h: '0 = tidak dibatasi' },
-    { k: 'mode', l: 'Mode', o: [[0, 'GRID (layer)'], [1, 'TREN (SL + trailing)']] }
-  ]},
-  { t: 'Cara entry', d: 'Mode instan membaca candle yang sedang berjalan (lebih cepat), candle close menunggu candle tutup.', f: [
-    { k: 'em', l: 'Mode entry', o: [[0, 'INSTAN (candle berjalan)'], [1, 'CANDLE CLOSE']] },
-    { k: 'cb', l: 'Konfirmasi (candle)', s: 1, min: 1, max: 10, h: '1 = langsung entry' },
-    { k: 'am', l: 'Filter ADX minimal', s: 1, min: 0, max: 100, h: '0 = off' },
-    { k: 'cs', l: 'Filter jarak dari EMA21 (x ATR)', s: 0.1, min: 0, h: '0 = off' },
-    { k: 'cr', l: 'Tutup basket jika sinyal berbalik', o: [[0, 'Tidak'], [1, 'Ya']] }
-  ]},
-  { t: 'RSI', d: 'Sinyal BUY saat RSI di atas level BUY, SELL saat di bawah level SELL.', f: [
-    { k: 'rp', l: 'Periode RSI', s: 1, min: 2, max: 100 },
-    { k: 'rb', l: 'Level BUY (RSI di atas)', s: 1, min: 0, max: 100 },
-    { k: 'rs', l: 'Level SELL (RSI di bawah)', s: 1, min: 0, max: 100 },
-    { k: 'rsl', l: 'Arah RSI harus searah', o: [[1, 'Ya'], [0, 'Tidak']] }
-  ]},
-  { t: 'Kondisi pasar (otomatis)', d: 'Sideways: grid normal. Tren searah basket: layer dibatasi. Tren melawan basket: tidak tambah layer (dan opsional ditutup).', f: [
-    { k: 'rg', l: 'Saklar otomatis', o: [[1, 'ON'], [0, 'OFF']] },
-    { k: 'rgt', l: 'Tren jika ADX minimal', s: 1, min: 1, max: 100 },
-    { k: 'rgs', l: 'Sideways jika ADX di bawah', s: 1, min: 0, max: 100 },
-    { k: 'rgl', l: 'Tren searah: layer maksimal', s: 1, min: 0, max: 100, h: '0 = tidak dibatasi' },
-    { k: 'rgb', l: 'Tahan basket baru lawan tren', o: [[1, 'Ya'], [0, 'Tidak']] },
-    { k: 'rgc', l: 'Tren melawan: tutup jika rugi ($)', s: 1, min: 0, h: '0 = hanya stop tambah layer' },
-    { k: 'rtf', l: 'Timeframe pembaca pasar', o: [[5, 'M5 (lebih cepat)'], [15, 'M15'], [30, 'M30'], [60, 'H1 (lebih tenang)']] },
-    { k: 'rgu', l: 'Saat BELUM JELAS', o: [[1, 'Batasi layer yang melawan arah'], [2, 'Tahan semua yang melawan arah'], [0, 'Normal (seperti sideways)']], h: 'Arah = DI jika ADX kuat, selain itu EMA20/50. Jika ADX kuat dan DI melawan basket, layer selalu ditahan.' },
-    { k: 'rgn', l: 'Belum jelas: layer maksimal yang melawan arah', s: 1, min: 0, max: 100, h: 'Untuk mode Batasi. 0 = tidak dibatasi' }
-  ]},
-  { t: 'Perekam data', d: 'EA mencatat saldo, equity, floating, basket, dan setelan tiap menit ke file CSV di folder Common\\Files MT5 untuk dianalisis.', f: [
-    { k: 'rec', l: 'Rekam data tiap menit', o: [[1, 'ON'], [0, 'OFF']] }
-  ]},
-  { t: 'Pelindung lonjakan', d: 'Saat harga lari cepat, EA berhenti menambah layer dan membuka basket yang melawan arah lonjakan, sampai harga tenang lagi.', f: [
-    { k: 'sp', l: 'Pelindung lonjakan', o: [[1, 'ON'], [0, 'OFF']] },
-    { k: 'spb', l: 'Diukur dalam (candle M1)', s: 1, min: 2, max: 30 },
-    { k: 'spa', l: 'Lonjakan jika gerak minimal (x rata-rata candle M1)', s: 0.5, min: 0.5, max: 50, h: 'Makin kecil makin sensitif' },
-    { k: 'spp', l: 'Atau gerak minimal (poin)', s: 1, min: 0, h: '0 = pakai pengali rata-rata candle di atas' },
-    { k: 'spc', l: 'Tenang setelah (candle M1 tanpa puncak baru)', s: 1, min: 1, max: 60 },
-    { k: 'lgm', l: 'Jeda minimal antar layer (menit)', s: 1, min: 0, max: 1440, h: '0 = off' },
-    { k: 'dg', l: 'Jarak grid melebar saat liar, maksimal (x)', s: 0.5, min: 1, max: 10, h: '1 = off. Contoh 2.5: jarak grid bisa sampai 2,5x saat pasar liar' }
-  ]},
-  { t: 'Grid & layer', d: 'Isi 0 untuk memakai setelan bawaan EA.', prev: 'lot', f: [
-    { k: 'ul', l: 'Pakai layering', o: [[0, 'Tidak'], [1, 'Ya']] },
-    { k: 'gp', l: 'Jarak grid (poin)', s: 1, min: 0, h: '0 = bawaan EA' },
-    { k: 'gl', l: 'Layer maksimal', s: 1, min: 0, max: 100, h: '0 = bawaan EA' },
-    { k: 'gm', l: 'Pengali lot', s: 0.1, min: 0, max: 5, h: '1.0 - 5.0, 0 = bawaan EA' },
-    { k: 'ga', l: 'Tambah lot per layer', s: 0.01, min: 0, h: 'Contoh 0.1 = 0.1, 0.2, 0.3 ... (menggantikan pengali)' }
-  ]},
-  { t: 'TP bertingkat', d: 'TP = total profit semua layer dalam satu basket. 0 = pakai target dasar.', prev: 'tp', f: [
-    { k: 't1l', l: 'TP1 s/d layer', s: 1, min: 1, max: 99 },
-    { k: 't1', l: 'TP1 ($)', s: 1, min: 0 },
-    { k: 't2l', l: 'TP2 s/d layer', s: 1, min: 1, max: 100 },
-    { k: 't2', l: 'TP2 ($)', s: 1, min: 0 },
-    { k: 't3', l: 'TP3 ($), layer berikutnya', s: 1, min: 0 }
-  ]},
-  { t: 'Proteksi', d: 'Isi 0 untuk mematikan.', f: [
-    { k: 'dt', l: 'Daily Target ($)', s: 1, min: 0 },
-    { k: 'dl', l: 'Daily Loss ($)', s: 1, min: 0 },
-    { k: 'eq', l: 'Equity Quit ($ floating)', s: 1, min: 0 },
-    { k: 'bc', l: 'Batas floating per basket ($)', s: 1, min: 0, h: 'Basket ditutup jika floating mencapai -$ ini. 0 = off' },
-    { k: 'bu', l: 'Blokir setelah kena batas (menit)', s: 1, min: 0, h: '0 = sampai besok' },
-    { k: 'ec', l: 'Equity cut per basket ($)', s: 1, min: 0, h: 'Basket ditutup jika floating mencapai -$ ini' },
-    { k: 'cn', l: 'Setelah equity cut', o: [[1, 'Stop sampai besok'], [0, 'Jeda beberapa menit']] },
-    { k: 'cp', l: 'Jeda setelah cut (menit)', s: 1, min: 0 },
-    { k: 'bl', l: 'Batas loss per bot ($)', s: 1, min: 0, only: ['CORE'] },
-    { k: 'bp', l: 'Bot lanjut setelah (menit)', s: 1, min: 0, only: ['CORE'] },
-    { k: 'mm', l: 'Money Management', o: [[0, 'OFF'], [1, 'ON']], only: ['MOVING', 'ELEVEN', 'RSI', 'FOLLOW'] },
-    { k: 'mmf', l: 'MM: floating maksimal ($)', s: 1, min: 0, only: ['MOVING', 'ELEVEN', 'RSI', 'FOLLOW'] },
-    { k: 'mmp', l: 'MM: trading lagi setelah (menit)', s: 1, min: 0, only: ['MOVING', 'ELEVEN', 'RSI', 'FOLLOW'] },
-    { k: 'lg', l: 'Limit gabungan semua chart', o: [[0, 'Tidak'], [1, 'Ya']] }
-  ]},
-  { t: 'Istirahat', f: [
-    { k: 'rc', l: 'Istirahat per siklus (menit)', s: 1, min: 0, h: '0 = tanpa istirahat' }
-  ]},
-  { t: 'Mode Tren', d: 'Hanya dipakai saat Mode = TREN.', f: [
-    { k: 'sl', l: 'Stop loss (x ATR)', s: 0.1, min: 0.1 },
-    { k: 'rr', l: 'Take profit (x SL)', s: 0.1, min: 0, h: '0 = tanpa TP, trailing saja' },
-    { k: 'be', l: 'Impas saat profit (x SL)', s: 0.1, min: 0 },
-    { k: 'tr', l: 'Trailing (x ATR)', s: 0.1, min: 0 },
-    { k: 'ru', l: 'Risiko per posisi ($)', s: 1, min: 0, h: '0 = pakai lot awal' }
-  ]}
-];
+/*__G_DEF__*/
 
+var G = [];   // daftar setelan dikirim server setelah admin login (api 'schema')
 var auth = null, data = null, selKey = '', base = {}, timer = null, tab = 'admin', lastFull = 0;
 var PN = { FTBB: 'FT Bollinger', FTBS: 'FT BB + Stoch', RSI: 'Falcora RSI', FOLLOW: 'Falcora Follow' };
 function pn(p) { return PN[p] || p; }
@@ -354,7 +270,7 @@ $('bLogin').onclick = function () { login(); };
 function startApp(d) {
   $('vLogin').classList.add('hide'); $('vApp').classList.remove('hide');
   show(d); lastFull = Date.now();
-  clearInterval(timer); timer = setInterval(refresh, 2500);
+  clearInterval(timer); timer = setInterval(refresh, 1000);
 }
 function login(tok) {
   $('bLogin').disabled = true; $('bLogin').textContent = 'Memeriksa...'; msg($('mLogin'));
@@ -362,6 +278,9 @@ function login(tok) {
   p.then(function (r) {
     auth = { tok: r.tok };
     store('flcTok', tok || $('iRemember').checked ? r.tok : null);
+    return api('schema', { auth: auth });
+  }).then(function (s) {
+    G = s.g || [];
     return api('data', { auth: auth });
   }).then(startApp).catch(function (e) {
     auth = null; store('flcTok', null);
@@ -370,7 +289,7 @@ function login(tok) {
   }).then(function () { $('bLogin').disabled = false; $('bLogin').textContent = 'Masuk'; $('iPass').value = ''; });
 }
 function sessionGone() {
-  clearInterval(timer); auth = null; data = null; selKey = ''; store('flcTok', null);
+  clearInterval(timer); G = []; auth = null; data = null; selKey = ''; store('flcTok', null);
   document.body.classList.remove('editing');
   $('vApp').classList.add('hide'); $('vEdit').classList.add('hide'); $('ph').classList.remove('hide'); $('vLogin').classList.remove('hide');
   msg($('mLogin'), 'Sesi login habis, silakan masuk lagi.', 'err');
@@ -378,7 +297,7 @@ function sessionGone() {
 $('logout').onclick = function () {
   if (dirty() && !confirm('Perubahan yang belum disimpan akan hilang. Keluar?')) return;
   if (auth) api('logout', { auth: auth }).catch(function () {});
-  auth = null; data = null; selKey = ''; clearInterval(timer); store('flcTok', null);
+  auth = null; data = null; selKey = ''; G = []; clearInterval(timer); store('flcTok', null);
   $('iPass').value = '';
   document.body.classList.remove('editing');
   $('vApp').classList.add('hide'); $('vEdit').classList.add('hide'); $('ph').classList.remove('hide'); $('vLogin').classList.remove('hide');
@@ -389,7 +308,6 @@ setInterval(function () { document.querySelectorAll('.ago').forEach(function (x)
 function agoS2(t) { if (!t) return '-'; var s = Math.max(0, Math.round((Date.now() + skew - t) / 1000)); return s < 90 ? s + ' detik lalu' : (s < 5400 ? Math.round(s / 60) + ' menit lalu' : Math.round(s / 3600) + ' jam lalu'); }
 function refresh() {
   if (!auth || document.hidden || busy) return;
-  if (!selKey && Date.now() - lastFull < 15000) return;
   busy = true; lastFull = Date.now();
   api('data', { auth: auth, sel: selKey }).then(function (d) {
     if (dirty()) { data = d; renderList(); renderSum(); var r = find(selKey); if (r) renderStats(r); return; }   // sedang diubah: hanya angka
