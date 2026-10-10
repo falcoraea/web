@@ -37,7 +37,7 @@ var CONFIG = {
     ga:  { name: 'Bisa ganti akun',         pct: 0.8 },
     web: { name: 'Web akun pelanggan',      price: 30000, normal: 0 }
   },
-  tarif: 30000, topup: [100000, 200000, 300000, 500000, 1000000], topupMin: 50000, akun: ''
+  tarif: 10000, topup: [100000, 200000, 300000, 500000, 1000000], topupMin: 50000, akun: ''
 };
 </script>
 <style>
@@ -170,6 +170,11 @@ var CONFIG = {
   .sheet input{width:100%;background:#0a1328;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:12px 13px;font:15px "Plus Jakarta Sans";outline:none}
   .sheet input:focus{border-color:var(--gold)}
   .sheet .btn{width:100%;margin-top:18px}
+  #maList .addon{display:flex;margin:10px 0 0;font-weight:400;font-size:14px;color:inherit}
+  #maList .addon{flex-wrap:nowrap!important;gap:10px;padding:12px}
+  #maList .addon>span:nth-of-type(2){flex:1;min-width:0}
+  #maList .addon .ap{margin-left:auto!important;text-align:right!important;font-size:13px}
+  #maList .addon input{position:absolute;opacity:0;width:0;height:0;padding:0;border:0}
   .sheet .cancel{display:block;margin:10px auto 0;background:none;border:0;color:var(--mist);font:600 14px "Plus Jakarta Sans";cursor:pointer}
   .ferr{display:none;margin-top:12px;font-size:14px;color:#ffb3ba;background:rgba(240,90,102,.1);border:1px solid rgba(240,90,102,.4);border-radius:10px;padding:10px 12px}
   .mline{display:flex;justify-content:space-between;font-size:14px;color:#c3cde0;padding:3px 0}
@@ -333,7 +338,7 @@ var CONFIG = {
     <div class="navr"><a class="navlogin" href="akun/">Masuk</a><a class="navbtn" href="#produk">Pilih EA</a></div>
   </div>
 </nav>
-<div class="freebar"><div class="wrap"><b>GRATIS selama tidak ada posisi terbuka.</b> <span>Bayar hanya di hari EA memegang posisi, <b class="jsTarif">Rp30.000</b> per hari per akun MT5. Tidak trading, tidak dipotong.</span></div></div>
+<div class="freebar"><div class="wrap"><b>GRATIS selama tidak ada posisi terbuka.</b> <span>Bayar hanya di hari EA memegang posisi, <b class="jsTarif">Rp10.000</b> per hari per akun MT5. Tidak trading, tidak dipotong.</span></div></div>
 
 <header class="hero">
   <div class="wrap">
@@ -387,7 +392,7 @@ var CONFIG = {
     <div class="sec-head">
       <span class="prelaunch">Harga pre-launching</span>
       <h2>Pilih EA kamu</h2>
-      <p class="sub">Semua EA khusus XAUUSD dan sama-sama membaca kondisi pasar. Harga EA langsung jadi <b>saldo awal</b> akun MT5 kamu, dipotong <b class="jsTarif">Rp30.000</b> per hari <b>hanya di hari EA memegang posisi</b>.</p>
+      <p class="sub">Semua EA khusus XAUUSD dan sama-sama membaca kondisi pasar. Harga EA langsung jadi <b>saldo awal</b> akun MT5 kamu, dipotong <b class="jsTarif">Rp10.000</b> per hari <b>hanya di hari EA memegang posisi</b>.</p>
     </div>
 
     <div class="promo-bar" id="promoBar" hidden>
@@ -585,7 +590,7 @@ var CONFIG = {
       <details><summary>Apa bedanya web akun, bot notifikasi, dan bot setting?</summary><p><b>Web akun</b> adalah halaman pribadimu di browser atau HP: dashboard, PnL per periode, ubah lot dan proteksi, jam kerja, ON/OFF, restart, saldo, top up, dan aduan. <b>Bot notifikasi</b> mengirim laporan ke Telegram lewat bot Falcora (sampai 6 ID). <b>Bot setting</b> memakai bot pribadimu sendiri dengan menu kendali: ON/OFF Algo Trading, PANIC, status, laporan, posisi, dan ganti lot.</p></details>
       <details><summary>Bot setting perlu pengaturan khusus di MT5?</summary><p>Izinkan WebRequest untuk api.telegram.org, script.google.com, dan script.googleusercontent.com. Untuk tombol ON/OFF Algo Trading, centang juga "Allow DLL imports" saat memasang EA. Tanpa itu, EA dan laporan tetap jalan, hanya tombol ON/OFF yang tidak bisa dipakai.</p></details>
       <details><summary>Komputer harus menyala terus?</summary><p>Ya, MetaTrader 5 harus tetap terbuka dan terhubung internet. Untuk berjalan 24 jam, kami sarankan memakai VPS.</p></details>
-      <details><summary>Bagaimana sistem saldo bekerja?</summary><p>Harga EA yang kamu bayar masuk jadi saldo akun MT5 tersebut. Setiap hari (dihitung jam WIB) saat EA membuka atau memegang posisi, saldo dipotong <b class="jsTarif">Rp30.000</b>, satu kali per akun berapa pun EA dan chart yang jalan. Hari tanpa posisi tidak dipotong. Hari tanpa posisi sama sekali gratis. Saldo habis: EA berhenti membuka posisi baru, posisi yang sudah terbuka tetap dikelola sampai selesai.</p></details>
+      <details><summary>Bagaimana sistem saldo bekerja?</summary><p>Harga EA yang kamu bayar masuk jadi saldo akun MT5 tersebut. Setiap hari (dihitung jam WIB) saat EA membuka atau memegang posisi, saldo dipotong <b class="jsTarif">Rp10.000</b>, satu kali per akun berapa pun EA dan chart yang jalan. Hari tanpa posisi tidak dipotong. Hari tanpa posisi sama sekali gratis. Saldo habis: EA berhenti membuka posisi baru, posisi yang sudah terbuka tetap dikelola sampai selesai.</p></details>
       <details><summary>Bagaimana cara top up?</summary><p>Lewat bagian <a href="#topup" style="color:var(--gold2)">Top up saldo</a> di halaman ini cukup dengan ID akun MT5, atau dari halaman akun jika memakai add-on web akun. Setelah pembayaran berhasil, saldo bertambah otomatis dan EA langsung bisa trading lagi.</p></details>
     </div>
   </div>
@@ -618,6 +623,17 @@ var CONFIG = {
     <button class="btn btn-gold" id="mGo" type="submit">Lanjut ke pembayaran</button>
     <button class="cancel" type="button" id="mX">Batal</button>
   </form>
+</div>
+
+<div class="modal" id="mAdd" role="dialog" aria-modal="true" aria-labelledby="maT">
+  <div class="sheet">
+    <h3 id="maT">Mau tambah add-on?</h3>
+    <p class="sub2">Kamu belum memilih tambahan apa pun. Centang yang kamu perlukan, atau lanjut tanpa add-on.</p>
+    <div id="maList"></div>
+    <div class="mtot" style="margin-top:12px"><span>Total</span><span id="maTot">-</span></div>
+    <button class="btn btn-gold" id="maGo" type="button" style="margin-top:12px">Lanjut</button>
+    <button class="cancel" type="button" id="maX">Lanjut tanpa add-on</button>
+  </div>
 </div>
 
 <div class="bar" id="bar" aria-live="polite">
@@ -678,6 +694,12 @@ var CONFIG = {
     document.getElementById('pbGo').disabled = q.sisa <= 0;
   }
 
+  function addSub(a) {
+    return a === 'tg' ? 'Notif PROFIT / LOSS tiap basket, status EA, laporan harian lewat bot Falcora'
+         : a === 'adm' ? 'Bot pribadimu: ON/OFF Algo, PANIC, ganti lot & setelan, laporan, 10 floating terdalam'
+         : a === 'web' ? 'Halaman akun di HP: cek saldo & top up, ubah lot & proteksi, ON/OFF dan restart EA. Login dengan password sendiri'
+         : 'Pindahkan lisensi & saldo ke akun MT5 lain kapan saja';
+  }
   function rp(n) { return n === 0 ? 'Gratis' : 'Rp' + Math.round(n).toLocaleString('id-ID'); }
   function off(p, s) { return s > p ? Math.round((1 - p / s) * 100) : 0; }
   function addPrice(k, key) { return k === 'ga' ? Math.round(P[key].price * A.ga.pct) : A[k].price; }
@@ -705,10 +727,7 @@ var CONFIG = {
               }).join('') + '</div>'
             : '') +
           ('<div class="addons-title">Tambahan' + (k === 'PROMO' ? ' (berlaku untuk semua akun di paket)' : '') + '</div>' + addonsOf(k).map(function (a) {
-                var sub = a === 'tg' ? 'Notif PROFIT / LOSS tiap basket, status EA, laporan harian lewat bot Falcora'
-                        : a === 'adm' ? 'Bot pribadimu: ON/OFF Algo, PANIC, ganti lot & setelan, laporan, 10 floating terdalam'
-                        : a === 'web' ? 'Halaman akun di HP: cek saldo & top up, ubah lot & proteksi, ON/OFF dan restart EA. Login dengan password sendiri'
-                        : 'Pindahkan lisensi & saldo ke akun MT5 lain kapan saja';
+                var sub = addSub(a);
                 return '<label class="addon"><input type="checkbox" data-a="' + a + '"><span class="sw" aria-hidden="true"></span>' +
                   '<span><b>' + A[a].name + '</b><span class="t">' + sub + '</span></span>' +
                   '<span class="ap num">' + (addNormal(a, k) > addPrice(a, k) ? '<s>' + rp(addNormal(a, k)) + '</s>' : '') + '+' + rp(addPrice(a, k)) + '</span></label>';
@@ -772,8 +791,40 @@ var CONFIG = {
   function closeModal() { modal.classList.remove('on'); }
   function checkout() {
     if (!state.key) return;
+    var any = addonsOf(state.key).some(function (a) { return state.add[a]; });
+    if (any) return openModal();
+    openAdd();
+  }
+  // pop-up add-on saat pembeli belum memilih tambahan apa pun
+  var mAdd = document.getElementById('mAdd'), maPick = {};
+  function maTotal() {
+    var t = P[state.key].price;
+    addonsOf(state.key).forEach(function (a) { if (maPick[a]) t += addPrice(a, state.key); });
+    document.getElementById('maTot').textContent = rp(t);
+    document.getElementById('maGo').textContent = Object.keys(maPick).some(function (a) { return maPick[a]; }) ? 'Lanjut dengan add-on' : 'Lanjut';
+  }
+  function openAdd() {
+    maPick = {};
+    document.getElementById('maList').innerHTML = addonsOf(state.key).map(function (a) {
+      return '<label class="addon"><input type="checkbox" data-ma="' + a + '"><span class="sw" aria-hidden="true"></span>' +
+        '<span><b>' + A[a].name + '</b><span class="t">' + addSub(a) + '</span></span>' +
+        '<span class="ap num">' + (addNormal(a, state.key) > addPrice(a, state.key) ? '<s>' + rp(addNormal(a, state.key)) + '</s>' : '') + '+' + rp(addPrice(a, state.key)) + '</span></label>';
+    }).join('');
+    document.querySelectorAll('#maList input').forEach(function (cb) { cb.onchange = function () { maPick[cb.dataset.ma] = cb.checked; maTotal(); }; });
+    maTotal();
+    mAdd.classList.add('on');
+  }
+  function closeAdd(apply) {
+    mAdd.classList.remove('on');
+    if (apply) {
+      addonsOf(state.key).forEach(function (a) { if (maPick[a]) state.add[a] = true; });
+      select(state.key, true);
+    }
     openModal();
   }
+  document.getElementById('maGo').onclick = function () { closeAdd(true); };
+  document.getElementById('maX').onclick = function () { closeAdd(false); };
+  mAdd.addEventListener('click', function (e) { if (e.target === mAdd) mAdd.classList.remove('on'); });
   function jsonp(params, cb) {
     var fn = '__flc' + Date.now(), sc = document.createElement('script'), done = false;
     window[fn] = function (r) { done = true; cb(r); delete window[fn]; sc.remove(); };
@@ -800,7 +851,7 @@ var CONFIG = {
   });
   document.getElementById('mX').onclick = closeModal;
   modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeModal(); mAdd.classList.remove('on'); } });
 
   // ---- event
   var opts = document.getElementById('opts');
@@ -829,7 +880,7 @@ var CONFIG = {
       el.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); }; });
     document.getElementById('tpNote').hidden = !CONFIG.akun;
     if (CONFIG.akun) document.getElementById('tpAkun').href = CONFIG.akun;
-    document.querySelectorAll('.jsTarif').forEach(function (x) { x.textContent = rp(CONFIG.tarif || 30000); });
+    document.querySelectorAll('.jsTarif').forEach(function (x) { x.textContent = rp(CONFIG.tarif || 10000); });
   }
   document.getElementById('tpAmt').oninput = function () { tpAmt = 0; document.querySelectorAll('#tpOps button').forEach(function (x) { x.classList.remove('on'); }); };
   document.getElementById('tpGo').onclick = function () {
@@ -847,14 +898,20 @@ var CONFIG = {
   };
   tpBuild();
 
+  function applyCfg(r) {
+    P = CONFIG.prices = r.prices; A = CONFIG.addons = r.addons || A;
+    if (r.tarif) CONFIG.tarif = r.tarif; if (r.topup && r.topup.length) CONFIG.topup = r.topup; if (r.topupMin) CONFIG.topupMin = r.topupMin; CONFIG.akun = r.akun || '';
+  }
+  // harga terakhir dari server disimpan di browser -> kunjungan berikutnya langsung tampil benar
+  try { var cc = JSON.parse(localStorage.getItem('flcCfg') || 'null'); if (cc && cc.prices) { applyCfg(cc); tpBuild(); } } catch (e) {}
   build();
   var h = location.hash.replace('#', '').toUpperCase();
   if (P[h]) select(h);
   // harga resmi dari server (Code.gs)
   jsonp({ action: 'harga' }, function (r) {
     if (r && r.ok && r.prices) {
-      P = CONFIG.prices = r.prices; A = CONFIG.addons = r.addons || A; build();
-      if (r.tarif) CONFIG.tarif = r.tarif; if (r.topup && r.topup.length) CONFIG.topup = r.topup; if (r.topupMin) CONFIG.topupMin = r.topupMin; CONFIG.akun = r.akun || ''; tpBuild();
+      applyCfg(r); build(); tpBuild();
+      try { localStorage.setItem('flcCfg', JSON.stringify(r)); } catch (e) {}
       if (h === 'PROMO' && P.PROMO) select('PROMO');
     }
     if (r && r.channel) {
