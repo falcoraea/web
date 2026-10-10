@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Falcora Akun</title>
 <meta name="description" content="Dashboard pelanggan Falcora: saldo, PnL, win rate, dan kendali EA XAUUSD dari HP.">
+<meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#070d1a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -75,6 +76,19 @@
   .chip small{display:block;color:var(--mut);font-size:10px;font-weight:700;letter-spacing:.05em}
   .chip b{display:block;font-size:14.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
   .chip .plus{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a1103;display:grid;place-items:center;font-weight:800;font-size:16px;flex:none}
+  .mnav{display:none}
+  .ea .rt{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:none}
+  .ea .sal{color:var(--mut);font-size:11px;font-weight:600;white-space:nowrap}
+  .ea .mini i,.idr{display:block;font-style:normal;color:#7f8fb0;font-size:10.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tbl{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+  .tbl th{color:var(--mut);font-size:10.5px;font-weight:700;letter-spacing:.04em;text-align:left;padding:6px 6px;border-bottom:1px solid var(--line)}
+  .tbl td{padding:7px 6px;border-bottom:1px solid rgba(36,54,92,.55);vertical-align:top}
+  .tbl td.r,.tbl th.r{text-align:right}
+  .tbl tr.tot td{font-weight:800;border-bottom:0}
+  .tbl small{display:block;color:#7f8fb0;font-size:10.5px}
+  .tag{font-size:10px;font-weight:800;padding:2px 6px;border-radius:6px;background:rgba(240,176,48,.14);color:var(--gold2);margin-left:4px}
+  .menu-list{display:grid;gap:8px;margin-top:12px}
+  .menu-list .btn{text-align:left}
   .side h4{margin:4px 0 0;font-size:12px;color:var(--mut);letter-spacing:.06em}
   .list{display:grid;gap:8px}
   .ea{display:block;background:var(--field);border:1px solid var(--line);border-radius:12px;padding:11px 12px;cursor:pointer;text-align:left;color:var(--txt);width:100%;font-size:14px}
@@ -159,7 +173,13 @@
   @media (max-width:1023px){
     .app{display:flex;flex-direction:column;height:auto;min-height:100%}
     .side{display:contents}
-    .side-top{order:0;padding:12px 14px 8px;position:sticky;top:0;z-index:5;background:rgba(7,13,26,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+    .side-top{order:0;padding:12px 14px 8px;position:sticky;top:0;z-index:5;background:rgba(7,13,26,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line);flex-wrap:wrap}
+    .mnav{display:flex;gap:6px;overflow-x:auto;width:100%;margin:2px -14px -2px;padding:6px 14px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    .mnav::-webkit-scrollbar{display:none}
+    .mnav button{flex:none;border:1px solid var(--line);background:var(--field);color:var(--mut);border-radius:20px;padding:7px 12px;font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+    .mnav button.on{color:#1a1103;background:linear-gradient(135deg,var(--gold2),var(--gold));border-color:var(--gold)}
+    .mnav button .d{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:var(--err);vertical-align:1px}
+    .mnav button .d.ok{background:var(--ok)}
     .main{order:1;padding:12px 14px 0;overflow:visible}
     .side h4,.side .list{order:2;margin:0 14px 10px}
     .mfoot,.app>.dfoot{display:block;order:4}
@@ -226,6 +246,7 @@
         <div><b>FALCORA</b><span id="who">Akun</span></div>
       </div>
       <button class="chip" id="bSaldo" title="Saldo Falcora & top up"><span><small>SALDO</small><b id="sTot">-</b></span><span class="plus" aria-hidden="true">+</span></button>
+      <nav class="mnav" id="mnav" aria-label="Menu"></nav>
     </div>
     <h4>AKUN TRADING &amp; EA</h4>
     <div class="list" id="list"></div>
@@ -281,6 +302,7 @@
         <div class="stats" id="dStats"></div>
         <div id="dState"></div>
         <div class="saldo-row" id="dSaldo"></div>
+        <div class="groups" id="dMore"></div>
         <div class="groups" id="dSet"></div>
         <div class="acts" id="dActs">
           <button class="btn small" data-a="off" id="bOff"></button>
@@ -299,6 +321,21 @@
       &copy; <span class="yr"></span> <a href="https://falcoraea.com">falcoraea.com</a>
     </div>
   <p class="foot dfoot" style="order:3">Data diperbarui otomatis tiap &plusmn;2&ndash;3 detik selama halaman ini dibuka</p>
+</div>
+
+<!-- MENU (HP) -->
+<div class="modal" id="mMenu" role="dialog" aria-modal="true" aria-labelledby="mmT">
+  <div class="sheet">
+    <button class="link x" data-close>Tutup</button>
+    <h2 id="mmT">Menu</h2>
+    <div class="menu-list">
+      <button class="btn ghost" id="mnTop">Saldo &amp; top up</button>
+      <button class="btn ghost" id="mnAdu">Aduan &amp; usulan fitur</button>
+      <button class="btn ghost" id="mnTour">Tuntunan</button>
+      <button class="btn ghost" id="mnInst">Pasang aplikasi</button>
+      <button class="btn ghost" id="mnOut" style="color:#ffb3ba">Keluar</button>
+    </div>
+  </div>
 </div>
 
 <!-- SALDO & TOP UP -->
@@ -388,6 +425,27 @@ function periodRange() {
   return [t, t, 'hari ini'];
 }
 function eaName(r) { return r.nm || ('Akun ' + r.acc); }
+var LOTS = [0.01, 0.02, 0.03, 0.05, 0.1, 0.5, 1];
+function lotStep(l) { return l < 0.0999 ? 0.01 : (l < 0.999 ? 0.1 : 1); }
+var REGT = { '1': ['TREN NAIK', 'pos'], '-1': ['TREN TURUN', 'neg'], '0': ['SIDEWAYS', ''], '2': ['BELUM JELAS', ''] };
+function regOf(m) { return (m && REGT[String(m.reg)]) || ['-', '']; }
+// akun cent (USC): nilai dibagi 100 untuk dolar & rupiah
+function isCent(c) { return /^USC$|cent/i.test(String(c || '')); }
+function usdOf(v, c) { return isCent(c) ? (Number(v) || 0) / 100 : (Number(v) || 0); }
+function idr(v, c) {
+  if (!data || !data.kurs || !/^US/i.test(String(c || 'USD'))) return '';
+  var x = usdOf(v, c) * data.kurs;
+  return '\u2248 ' + (x < 0 ? '-' : '') + 'Rp' + Math.round(Math.abs(x)).toLocaleString('id-ID');
+}
+function ccyTag(c) { return c ? ' <small style="display:inline;font-size:11px">' + esc(c) + '</small>' : ''; }
+// jumlahkan nilai beberapa akun: satu mata uang -> apa adanya, campuran USD & USC -> semua jadi USD
+function sumC(list) {
+  var cs = {}; list.forEach(function (x) { cs[x[1] || 'USD'] = 1; });
+  var one = Object.keys(cs).length <= 1, c = one ? (Object.keys(cs)[0] || '') : 'USD', v = 0;
+  list.forEach(function (x) { v += one ? (Number(x[0]) || 0) : usdOf(x[0], x[1]); });
+  return { v: v, c: c };
+}
+function ccyOfKey(k) { var r = rowOf(k); return r && r.m ? r.m.ccy : 'USD'; }
 function accOf(acc) { return (data.accounts || []).filter(function (x) { return x.acc === acc; })[0] || {}; }
 function rowOf(k) { if (!data) return null; for (var i = 0; i < data.rows.length; i++) if (data.rows[i].key === k) return data.rows[i]; return null; }
 
@@ -443,6 +501,7 @@ function refresh() {
   busy = true;
   api('akun', { auth: auth }).then(show).catch(function (e) { if (e.code === 'SESI') gone('Sesi login habis, silakan masuk lagi.'); }).then(function () { busy = false; });
   if (Date.now() - pnlAt > 20000) loadPnl(false);
+  if (sel && Date.now() - detAt > 30000) loadDet();
 }
 document.addEventListener('visibilitychange', function () { if (!document.hidden) refresh(); });
 
@@ -453,10 +512,10 @@ document.querySelectorAll('#seg button').forEach(function (b) {
     document.querySelectorAll('#seg button').forEach(function (x) { x.classList.toggle('on', x === b); });
     $('range').classList.toggle('hide', period !== 'cu');
     if (period === 'cu' && !$('dFrom').value) { var t = wib(new Date()); $('dFrom').value = t.slice(0, 8) + '01'; $('dTo').value = t; }
-    loadPnl(true);
+    loadPnl(true); loadDet();
   };
 });
-$('dFrom').onchange = $('dTo').onchange = function () { loadPnl(true); };
+$('dFrom').onchange = $('dTo').onchange = function () { loadPnl(true); loadDet(); };
 function loadPnl() {
   if (!auth || pnlBusy) return;
   var r = periodRange(), key = r[0] + '|' + r[1];
@@ -492,33 +551,59 @@ function render() {
   var pr = periodRange();
   $('dSub').textContent = '· ' + pr[2];
   // total semua akun
-  var bal = 0, eq = 0, flt = 0, pos = 0, ccy = '', nOn = 0, posKnown = false;
-  data.accs.forEach(function (acc) { var m = latestOf(acc); if (m) { bal += m.bal; eq += m.eq; ccy = ccy || m.ccy; nOn++; } });
-  data.rows.forEach(function (r) { if (r.m && online(r)) { flt += r.m.flt; if (r.m.pos !== null && r.m.pos !== undefined) { pos += r.m.pos; posKnown = true; } } });
-  var c = ccy ? ' <small style="display:inline;font-size:11px">' + esc(ccy) + '</small>' : '', pt = pnlTot();
-  var dash = stat('SALDO AKUN', nOn ? fm(bal) + c : '-', '', data.accs.length > 1 ? nOn + ' dari ' + data.accs.length + ' akun online' : undefined) +
-    stat('EQUITY', nOn ? fm(eq) + c : '-') + stat('FLOATING', fm(flt, true), pc(flt)) +
-    stat('PNL ' + pr[2].toUpperCase(), pt ? fm(pt.pl, true) : '-', pt ? pc(pt.pl) : '') + wrStat(pt) + stat('POSISI TERBUKA', posKnown ? pos : '-');
+  var lb = [], le = [], lf = [], pos = 0, nOn = 0, posKnown = false;
+  data.accs.forEach(function (acc) { var m = latestOf(acc); if (m) { lb.push([m.bal, m.ccy]); le.push([m.eq, m.ccy]); nOn++; } });
+  data.rows.forEach(function (r) { if (r.m && online(r)) { lf.push([r.m.flt, r.m.ccy]); if (r.m.pos !== null && r.m.pos !== undefined) { pos += r.m.pos; posKnown = true; } } });
+  var B = sumC(lb), E = sumC(le), F = sumC(lf), pt = pnlTot(), P = null;
+  if (pt) { var lp = []; Object.keys(pnl.key || {}).forEach(function (k) { if (rowOf(k)) lp.push([pnl.key[k].pl, ccyOfKey(k)]); }); P = sumC(lp); }
+  var dash = stat('BALANCE', nOn ? fm(B.v) + ccyTag(B.c) : '-', '', (nOn ? idr(B.v, B.c) : '') + (data.accs.length > 1 ? (nOn ? ' · ' : '') + nOn + '/' + data.accs.length + ' akun online' : '')) +
+    stat('EQUITY', nOn ? fm(E.v) + ccyTag(E.c) : '-', '', nOn ? idr(E.v, E.c) : undefined) +
+    stat('FLOATING', fm(F.v, true), pc(F.v), lf.length ? idr(F.v, F.c) : undefined) +
+    stat('PNL ' + pr[2].toUpperCase(), P ? fm(P.v, true) : '-', P ? pc(P.v) : '', P ? idr(P.v, P.c) : undefined) + wrStat(pt) + stat('POSISI TERBUKA', posKnown ? pos : '-');
   $('dash').innerHTML = dash;
   // daftar EA (nama dulu, lalu pair & EA)
   var h = '';
   data.rows.forEach(function (r) {
-    var a = accOf(r.acc), pe = pnlEa(r.key), on = online(r);
+    var a = accOf(r.acc), pe = pnlEa(r.key), on = online(r), m = r.m, c = m ? m.ccy : '', hasS = a.saldo !== null && a.saldo !== undefined;
     h += '<button class="ea' + (r.key === sel ? ' on' : '') + '" data-k="' + esc(r.key) + '">' +
-      '<div class="r1"><div class="t">' + esc(eaName(r)) + '</div>' + (on ? '<span class="pill ok">ONLINE</span>' : '<span class="pill no">OFFLINE</span>') + '</div>' +
+      '<div class="r1"><div class="t">' + esc(eaName(r)) + '</div><div class="rt">' + (on ? '<span class="pill ok">ONLINE</span>' : '<span class="pill no">OFFLINE</span>') +
+        (hasS ? '<span class="sal' + (a.saldo < data.tarif ? ' neg' : '') + '">Saldo ' + rp(a.saldo) + '</span>' : '') + '</div></div>' +
       '<div class="s">' + esc(r.sym) + ' &middot; ' + esc(PN[r.prod] || r.prod) + ' #' + r.ch + (data.accs.length > 1 ? ' &middot; akun ' + esc(r.acc) : '') + '</div>' +
-      '<div class="mini"><div><span>FLOATING</span><b class="' + (r.m ? pc(r.m.flt) : '') + '">' + (r.m ? fm(r.m.flt, true) : '-') + '</b></div>' +
-      '<div><span>PNL ' + (period === 'td' ? 'HARI INI' : 'PERIODE') + '</span><b class="' + (pe ? pc(pe.pl) : '') + '">' + (pe ? fm(pe.pl, true) : '-') + '</b></div>' +
-      '<div><span>SALDO</span><b class="' + (a.saldo !== null && a.saldo !== undefined && a.saldo < data.tarif ? 'neg' : '') + '">' + (a.saldo !== null && a.saldo !== undefined ? rp(a.saldo) : '-') + '</b></div></div></button>';
+      '<div class="mini"><div><span>BALANCE' + (c ? ' ' + esc(c) : '') + '</span><b>' + (m ? fm(m.bal) : '-') + '</b><i>' + (m ? idr(m.bal, c) : '') + '</i></div>' +
+      '<div><span>FLOATING</span><b class="' + (m ? pc(m.flt) : '') + '">' + (m ? fm(m.flt, true) : '-') + '</b><i>' + (m ? idr(m.flt, c) : '') + '</i></div>' +
+      '<div><span>PNL ' + (period === 'td' ? 'HARI INI' : 'PERIODE') + '</span><b class="' + (pe ? pc(pe.pl) : '') + '">' + (pe ? fm(pe.pl, true) : '-') + '</b><i>' + (pe ? idr(pe.pl, c) : '') + '</i></div></div></button>';
   });
   $('list').innerHTML = h || '<div class="empty">Belum ada EA yang terhubung. Pasang EA Falcora di MetaTrader, izinkan WebRequest, lalu tunggu sekitar 1 menit.</div>';
   $('list').querySelectorAll('.ea').forEach(function (b) { b.onclick = function () { openEa(b.dataset.k); }; });
+  renderNav();
   if (sel) renderDet(false);
 }
+// menu atas (HP): dashboard, tiap akun trading, aduan, menu lain
+function renderNav() {
+  var h = '<button data-n="dash" class="' + (sel ? '' : 'on') + '">Dashboard</button>';
+  data.rows.forEach(function (r) { h += '<button data-n="ea" data-k="' + esc(r.key) + '" class="' + (r.key === sel ? 'on' : '') + '"><span class="d' + (online(r) ? ' ok' : '') + '"></span>' + esc(eaName(r)) + '</button>'; });
+  h += '<button data-n="adu">Aduan</button><button data-n="menu">&#9776; Menu</button>';
+  var nav = $('mnav'), sl = nav.scrollLeft;
+  nav.innerHTML = h; nav.scrollLeft = sl;
+  nav.querySelectorAll('button').forEach(function (b) { b.onclick = function () { navGo(b.dataset.n, b.dataset.k); }; });
+}
+function navGo(n, k) {
+  if (n === 'ea') { openEa(k); var b = document.querySelector('#mnav button.on'); if (b && b.scrollIntoView) b.scrollIntoView({ inline: 'center', block: 'nearest' }); return; }
+  if (n === 'menu') { $('mMenu').classList.add('on'); return; }
+  if (sel) { if (dirty() && !confirm('Perubahan yang belum disimpan akan hilang. Lanjut?')) return; closeEa(); }
+  if (n === 'adu') setTimeout(function () { var y = $('aduBox').getBoundingClientRect().top + window.scrollY - 110; window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); }, 30);
+  else window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+$('mnTop').onclick = function () { $('mMenu').classList.remove('on'); renderSaldo(); $('mSaldo').classList.add('on'); };
+$('mnAdu').onclick = function () { $('mMenu').classList.remove('on'); navGo('adu'); };
+$('mnTour').onclick = function () { $('mMenu').classList.remove('on'); tour(0); };
+$('mnInst').onclick = function () { $('mMenu').classList.remove('on'); $('bInstall2').click(); };
+$('mnOut').onclick = function () { $('mMenu').classList.remove('on'); doLogout(); };
+
 function stopTxt(r) {
   if (!r.m) return '';
   var s = r.m.st !== null && r.m.st !== undefined ? r.m.st : String(r.m.why || '');
-  if (/->|BUY|SELL|sinyal|entry|lonjakan|searah|lawan|belum ada/i.test(s)) return '';
+  if (/->|BUY|SELL|entry/i.test(s)) return '';
   return s;
 }
 function eaState(r) {
@@ -534,7 +619,9 @@ function openEa(k) {
   var first = sel !== k;
   sel = k; document.body.classList.add('det');
   $('vDash').classList.add('hide'); $('vDet').classList.remove('hide'); $('dDiv').classList.remove('hide');
+  if (first) { det = null; detKey = ''; }
   render(); renderDet(first);
+  if (first) loadDet();
   if (first) { msg($('mSave')); $('dNameEdit').classList.add('hide'); $('dNameBox').classList.remove('hide'); }
   if (first) { var y = $('dDiv'); if (mobile.matches) window.scrollTo(0, Math.max(0, y.getBoundingClientRect().top + window.scrollY - 70)); else $('main').scrollTop = Math.max(0, y.offsetTop - 10); }
 }
@@ -550,10 +637,13 @@ function renderDet(rebuild) {
   if ($('dNameEdit').classList.contains('hide')) $('dName').textContent = eaName(r);
   $('dSub2').textContent = r.sym + ' · Falcora ' + (PN[r.prod] || r.prod) + ' #' + r.ch + ' · akun MT5 ' + r.acc;
   $('dPills').innerHTML = (pending(r) ? '<span class="pill wait">MENUNGGU EA</span>' : '') + (online(r) ? '<span class="pill ok">ONLINE</span>' : '<span class="pill no">OFFLINE</span>');
-  var cc = m && m.ccy ? ' <small style="display:inline;font-size:11px">' + esc(m.ccy) + '</small>' : '';
-  $('dStats').innerHTML = stat('SALDO AKUN', m ? fm(m.bal) + cc : '-') + stat('EQUITY', m ? fm(m.eq) + cc : '-') + stat('FLOATING', m ? fm(m.flt, true) : '-', m ? pc(m.flt) : '') +
-    stat('PNL ' + pr[2].toUpperCase(), pe ? fm(pe.pl, true) : '-', pe ? pc(pe.pl) : '') + wrStat(pe) +
+  var c = m ? m.ccy : '', cc = ccyTag(c), rg = regOf(m);
+  $('dStats').innerHTML = stat('BALANCE', m ? fm(m.bal) + cc : '-', '', m ? idr(m.bal, c) : undefined) + stat('EQUITY', m ? fm(m.eq) + cc : '-', '', m ? idr(m.eq, c) : undefined) +
+    stat('FLOATING', m ? fm(m.flt, true) : '-', m ? pc(m.flt) : '', m ? idr(m.flt, c) : undefined) +
+    stat('PNL ' + pr[2].toUpperCase(), pe ? fm(pe.pl, true) : '-', pe ? pc(pe.pl) : '', pe ? idr(pe.pl, c) : undefined) + wrStat(pe) +
+    stat('KONDISI PASAR', online(r) ? rg[0] : '-', online(r) ? rg[1] : '', 'dibaca otomatis oleh EA') +
     '<div class="stat"><span>POSISI &middot; DIPERBARUI</span><b>' + (m && m.pos !== null && m.pos !== undefined ? m.pos : '-') + ' <small style="display:inline" class="ago" data-t="' + (m ? m.t : 0) + '">' + (m ? agoTxt(m.t) : '') + '</small></b></div>';
+  renderMore();
   var st = eaState(r);
   $('dState').innerHTML = st ? '<div class="state ' + st[0] + '">' + esc(st[1]) + '</div>' : '';
   $('dSaldo').innerHTML = a.saldo === null || a.saldo === undefined ? '<span>Akun ' + esc(r.acc) + ' memakai lisensi tanpa sistem saldo.</span>' :
@@ -566,6 +656,51 @@ function renderDet(rebuild) {
   $('bOff').classList.toggle('hide', !('off' in r.ea)); $('bRst').classList.toggle('hide', !('rst' in r.ea));
   if (rebuild || !dirty()) buildForm(r);
 }
+var det = null, detKey = '', detAt = 0, detBusy = false;
+function detRk() { var pr = periodRange(); return sel + '|' + pr[0] + '|' + pr[1]; }
+function loadDet() {
+  if (!auth || !sel || detBusy) return;
+  var pr = periodRange(), k = detRk();
+  detBusy = true;
+  api('cdet', { auth: auth, key: sel, from: pr[0], to: pr[1] }).then(function (d) { det = d; detKey = k; detAt = Date.now(); renderMore(); })
+    .catch(function () {}).then(function () { detBusy = false; });
+}
+function tWib(t, withDate) {
+  if (!t) return '-';
+  var o = { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' };
+  if (withDate) { o.day = '2-digit'; o.month = 'short'; }
+  return new Date(t).toLocaleString('id-ID', o);
+}
+function hariOf(d) { return new Date(d + 'T12:00:00+07:00').toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'short' }); }
+function renderMore() {
+  var r = rowOf(sel); if (!r || !$('dMore')) return;
+  var c = r.m ? r.m.ccy : '', pr = periodRange(), ok = det && detKey === detRk(), multi = pr[0] !== pr[1];
+  var fl = '<section class="grp"><h3>10 floating terdalam <span class="muted" style="font-weight:500">&middot; ' + esc(pr[2]) + '</span></h3>';
+  if (!ok) fl += '<p class="muted">Memuat...</p>';
+  else if (!det.fl.length) fl += '<p class="muted">Belum ada basket dengan floating minus di periode ini.</p>';
+  else fl += '<table class="tbl"><tr><th>#</th><th>Arah</th><th>Layer / lot</th><th class="r">Floating</th><th class="r">Hasil</th></tr>' + det.fl.map(function (x, i) {
+      var d = x.d === 1 || x.d === 'BUY' ? 'BUY' : 'SELL';
+      return '<tr><td>' + (i + 1) + '</td><td><b class="' + (d === 'BUY' ? 'pos' : 'neg') + '">' + d + '</b><small>' + tWib(x.t, multi || x.open) + '</small></td>' +
+        '<td>' + x.ly + ' layer<small>' + fm(x.lt).replace(/,00$/, '') + ' lot</small></td>' +
+        '<td class="r"><b class="neg">' + fm(x.v) + '</b><small>' + idr(x.v, c) + '</small></td>' +
+        '<td class="r">' + (x.open ? '<span class="tag">BERJALAN</span>' : '<b class="' + pc(x.pl) + '">' + fm(x.pl, true) + '</b><small>' + idr(x.pl, c) + '</small>') + '</td></tr>';
+    }).join('') + '</table>';
+  fl += '</section>';
+  var wk = '<section class="grp"><h3>PnL minggu ini <span class="muted" style="font-weight:500">&middot; Senin s/d kemarin</span></h3>';
+  if (!ok) wk += '<p class="muted">Memuat...</p>';
+  else if (!det.wk.length) wk += '<p class="muted">Hari ini Senin: rekap minggu ini mulai tampil besok.</p>';
+  else {
+    var t = { pl: 0, w: 0, l: 0 };
+    wk += '<table class="tbl"><tr><th>Hari</th><th class="r">Basket</th><th class="r">PnL</th></tr>' + det.wk.map(function (x) {
+      t.pl += x.pl; t.w += x.w; t.l += x.l;
+      return '<tr><td>' + esc(hariOf(x.d)) + '</td><td class="r">' + (x.w + x.l ? x.w + 'W / ' + x.l + 'L' : '-') + '</td>' +
+        '<td class="r"><b class="' + pc(x.pl) + '">' + (x.ada ? fm(x.pl, true) : '-') + '</b><small>' + (x.ada ? idr(x.pl, c) : '') + '</small></td></tr>';
+    }).join('') +
+      '<tr class="tot"><td>Total</td><td class="r">' + t.w + 'W / ' + t.l + 'L</td><td class="r"><span class="' + pc(t.pl) + '">' + fm(t.pl, true) + '</span><small>' + idr(t.pl, c) + '</small></td></tr></table>';
+  }
+  wk += '</section>';
+  $('dMore').innerHTML = fl + wk;
+}
 function buildForm(r) {
   base = {}; Object.keys(r.ea).forEach(function (k) { base[k] = val(r, k); });
   $('dSet').innerHTML = GROUPS.map(function (g) {
@@ -573,6 +708,13 @@ function buildForm(r) {
     if (!fs.length) return '';
     return '<section class="grp"><h3>' + g.t + '</h3><div class="grid">' + fs.map(function (f) {
       var v = base[f.k];
+      if (f.k === 'lot') {
+        var ops = (data.lots || LOTS).slice(), cur = num(v);
+        if (!ops.some(function (x) { return Math.abs(x - cur) < 1e-9; })) ops.unshift(cur);
+        return '<div><label class="f" for="k_lot">' + f.l + '</label><select id="k_lot" data-k="lot">' + ops.map(function (x) {
+          return '<option value="' + x + '"' + (Math.abs(x - cur) < 1e-9 ? ' selected' : '') + '>' + x + ((data.lots || LOTS).indexOf(x) < 0 ? ' (sekarang)' : '') + '</option>'; }).join('') +
+          '</select><div class="now" id="lotH"></div></div>';
+      }
       return '<div><label class="f" for="k_' + f.k + '">' + f.l + '</label>' + (f.time
         ? '<input type="time" id="k_' + f.k + '" data-k="' + f.k + '" data-time="1" value="' + hhmm(v) + '">'
         : '<input type="number" inputmode="decimal" id="k_' + f.k + '" data-k="' + f.k + '" step="' + f.s + '" min="' + f.min + '" value="' + num(v) + '">') +
@@ -592,6 +734,7 @@ function dirty() { return !!sel && Object.keys(changes()).length > 0; }
 function update() {
   var c = changes(), n = Object.keys(c).length;
   $('dSet').querySelectorAll('[data-k]').forEach(function (x) { x.classList.toggle('chg', x.dataset.k in c); });
+  if ($('lotH')) { var lv = Number($('k_lot').value) || 0.01; $('lotH').textContent = 'Tambah lot per layer otomatis +' + lotStep(lv) + ', target profit basket ikut menyesuaikan lot.'; }
   $('bSave').disabled = !n; $('bReset').disabled = !n; $('bSave').textContent = n ? 'Simpan ' + n + ' perubahan' : 'Simpan';
 }
 function send(vals, okText) {
@@ -605,7 +748,7 @@ function send(vals, okText) {
 $('bReset').onclick = function () { var r = rowOf(sel); if (r) buildForm(r); msg($('mSave')); };
 $('bSave').onclick = function () {
   var c = changes(); if (!Object.keys(c).length) return;
-  if (c.lot !== undefined && c.lot > 1 && !confirm('Lot ' + c.lot + ' cukup besar. Yakin?')) return;
+  if (c.lot !== undefined && c.lot >= 0.5 && !confirm('Lot ' + c.lot + ' cukup besar (tambah lot per layer +' + lotStep(c.lot) + '). Pastikan balance cukup. Yakin?')) return;
   send(c, 'Tersimpan. EA menerapkan dalam beberapa detik (tanda "MENUNGGU EA" hilang setelah diterapkan).');
 };
 $('bOff').onclick = function () {
@@ -703,12 +846,14 @@ $('uGo').onclick = function () {
 // ---------- tuntunan ----------
 var TOUR = [
   { el: '#bSaldo', t: 'Saldo Falcora', p: 'Total saldo semua akun MT5 kamu. Ketuk untuk melihat saldo per akun, riwayat pemakaian harian, dan top up.' },
+  { el: function () { return mobile.matches ? '#mnav' : '#list'; }, t: 'Menu akun', p: 'Pindah cepat antara Dashboard, tiap akun trading, Aduan, dan menu lain (top up, tuntunan, pasang aplikasi, keluar).', back: 1 },
   { el: '#dashBox', t: 'Dashboard total', p: 'Ringkasan semua akun: saldo, equity, floating, PnL, win rate, dan jumlah posisi terbuka.', back: 1 },
   { el: '#seg', t: 'Pilih periode', p: 'Ganti periode PnL dan win rate: hari ini, kemarin, minggu ini, bulan ini, atau rentang tanggal sendiri.', back: 1 },
   { el: '#list', t: 'Akun trading & EA', p: 'Semua EA yang terhubung: nama, pair, jenis EA, floating, PnL, dan saldo akun. Ketuk salah satu untuk membuka detailnya.', back: 1 },
   { el: '#dNameBox', t: 'Nama EA', p: 'Beri nama supaya mudah dikenali. Nama ini juga dipakai di panel MetaTrader dan bot Telegram.', det: 1 },
-  { el: '#dStats', t: 'Data EA', p: 'Saldo, equity, floating, PnL, win rate, jumlah posisi, dan waktu laporan terakhir EA ini.', det: 1 },
-  { el: '#dSet', t: 'Setelan', p: 'Ubah lot, jam kerja, dan batas proteksi, lalu tekan Simpan. EA menerapkannya dalam beberapa detik.', det: 1 },
+  { el: '#dStats', t: 'Data akun trading', p: 'Balance, equity, floating, PnL, win rate, kondisi pasar, dan jumlah posisi. Angka kecil di bawahnya adalah perkiraan dalam rupiah.', det: 1 },
+  { el: '#dMore', t: 'Floating terdalam & PnL minggu ini', p: '10 floating terdalam sesuai periode yang dipilih, dan PnL per hari dari Senin sampai kemarin.', det: 1 },
+  { el: '#dSet', t: 'Setelan', p: 'Pilih lot (tambah lot per layer dan target profit ikut menyesuaikan), atur jam kerja dan batas proteksi, lalu tekan Simpan.', det: 1 },
   { el: '#dActs', t: 'Kendali EA', p: 'Matikan atau nyalakan EA, dan Restart untuk lanjut trading setelah Equity Quit atau STOP.', det: 1 },
   { el: '#aduBox', t: 'Aduan & usulan', p: 'Kirim kendala atau ide fitur ke admin. Balasannya muncul di sini.', back: 1 },
   { el: function () { return mobile.matches ? '#bInstall2' : '#bInstall'; }, t: 'Pasang aplikasi', p: 'Pasang halaman ini di layar utama HP seperti aplikasi. Tuntunan ini bisa dibuka lagi kapan saja lewat tombol Tuntunan.', back: 1 }
