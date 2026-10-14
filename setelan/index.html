@@ -468,11 +468,12 @@ function update() {
   $('bSave').textContent = n ? 'Simpan ' + n + ' perubahan' : 'Simpan';
   var p = $('p_lot');
   if (p) {
-    var lot = val('lot'), gl = val('gl'), gm = val('gm'), ga = val('ga');
+    var lot = val('lot'), gl = val('gl'), gm = val('gm'), ga = val('ga'), lt = val('lt') || 0;
     if (ga > 0 || gm > 0) {
       var n2 = Math.min(gl > 0 ? gl : 5, 100), list = [], tot = 0;
       for (var i = 0; i < n2; i++) {
-        var l = ga > 0 ? lot + ga * i : lot * Math.pow(gm, i);
+        var ii = lt > 0 ? Math.min(i, lt - 1) : i;
+        var l = ga > 0 ? lot + ga * ii : lot * Math.pow(gm, ii);
         l = Math.floor(l * 100 + 1e-6) / 100; tot += l;
         if (i < 10) list.push(l.toFixed(2));
       }
