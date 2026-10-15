@@ -484,10 +484,15 @@ function update() {
   }
   var t = $('p_tp');
   if (t) {
-    var a = Math.max(1, val('t1l')), b = Math.max(a, val('t2l'));
     var f = function (v) { return v > 0 ? '$' + num(v) : 'target dasar'; };
-    t.innerHTML = 'TP1 layer <b>1-' + a + '</b>: ' + f(val('t1')) + ' &nbsp;&middot;&nbsp; TP2 layer <b>' + (a + 1) + '-' + b + '</b>: ' + f(val('t2')) +
-                  ' &nbsp;&middot;&nbsp; TP3 layer <b>' + (b + 1) + '+</b>: ' + f(val('t3'));
+    var n = ('tpn' in base) ? Math.max(1, Math.min(10, val('tpn') || 3)) : 3, lo = 1, parts = [];
+    for (var i = 1; i <= n; i++) {
+      var to = i < n ? Math.max(lo, val('t' + i + 'l') || lo) : 0;
+      parts.push('TP' + i + ' layer <b>' + (i < n ? (lo === to ? lo : lo + '-' + to) : lo + '+') + '</b>: ' + f(val('t' + i)));
+      lo = to + 1;
+    }
+    var tg = ('tg' in base) ? val('tg') : 0;
+    t.innerHTML = parts.join(' &nbsp;&middot;&nbsp; ') + (tg > 0 ? '<br>Mulai layer <b>' + tg + '</b>: TP tangga (tutup di harga layer ke-(jumlah - ' + Math.max(1, val('tgm') || 1) + '))' : '');
   }
 }
 
